@@ -1,26 +1,68 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AppLayout } from "@/components/app-layout";
+import { ShiftStatusCard } from "@/components/shift-status-card";
+import { QuickNotesWidget } from "@/components/quick-notes-widget";
+import { AnimatedStatCard } from "@/components/animated-stat-card";
+import { useApp } from "@/lib/app-context";
+import { parseAnchorDate } from "@/lib/storage";
+import { getShiftDaysInMonth } from "@/lib/shift-engine";
+import { CalendarDays, Clock, Siren } from "lucide-react";
+import { GlassCard } from "@/components/glass-card";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: () => (
+    <AppLayout>
+      <Home />
+    </AppLayout>
+  ),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function greeting(t: (k: "greetingMorning" | "greetingAfternoon" | "greetingEvening") => string) {
+  const h = new Date().getHours();
+  if (h < 12) return t("greetingMorning");
+  if (h < 18) return t("greetingAfternoon");
+  return t("greetingEvening");
 }
 
-function Index() {
-  return <PlaceholderIndex />;
+function Home() {
+  const { state, t } = useApp();
+  const anchor = parseAnchorDate(state.anchorDate);
+  const now = new Date();
+  const shiftsThisMonth = anchor ? getShiftDaysInMonth(now.getFullYear(), now.getMonth(), anchor).length : 0;
+  const hours = shiftsThisMonth * 24;
+  const nextNurseId = state.evacuationQueue[0];
+  const nextNurse = state.nurses.find((n) => n.id === nextNurseId);
+
+  return (
+    <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
+      <header className="flex items-end justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{greeting(t)}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("appName")}</h1>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {now.toLocaleDateString(state.language, { weekday: "long", day: "numeric", month: "short" })}
+        </span>
+      </header>
+
+      <ShiftStatusCard />
+
+      <div className="grid grid-cols-2 gap-4">
+        <AnimatedStatCard icon={CalendarDays} label={t("shiftsThisMonth")} value={shiftsThisMonth} accent="shift" />
+        <AnimatedStatCard icon={Clock} label={t("estimatedHours")} value={`${hours}h`} accent="accent" />
+      </div>
+
+      <GlassCard>
+        <div className="flex items-center gap-2 mb-3">
+          <Siren className="size-4 text-primary" />
+          <h3 className="font-semibold">{t("nextNurse")}</h3>
+        </div>
+        <p className="text-2xl font-semibold text-gradient">
+          {nextNurse?.name ?? "—"}
+        </p>
+      </GlassCard>
+
+      <QuickNotesWidget />
+    </div>
+  );
 }
