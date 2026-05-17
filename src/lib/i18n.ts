@@ -141,6 +141,13 @@ const ar: Dict = {
   noHistory: "لا أدوار مكتملة بعد",
   upcoming: "القادم",
   today: "اليوم",
+  shiftAlarm: "منبه الوردية",
+  alarm: "المنبه",
+  alarmTime: "وقت المنبه",
+  enableAlarm: "تفعيل منبه الوردية",
+  alarmHelp: "يرن فقط في أيام الوردية في الوقت المحدد.",
+  nextAlarm: "المنبه القادم",
+  noAlarmScheduled: "لا يوجد منبه مجدول",
 };
 
 const fr: Dict = {
