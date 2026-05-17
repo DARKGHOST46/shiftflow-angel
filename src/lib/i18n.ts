@@ -67,6 +67,13 @@ const en: Dict = {
   noHistory: "No completed turns yet",
   upcoming: "Upcoming",
   today: "Today",
+  shiftAlarm: "Shift alarm",
+  alarm: "Alarm",
+  alarmTime: "Alarm time",
+  enableAlarm: "Enable shift alarm",
+  alarmHelp: "Rings only on shift days at the chosen time.",
+  nextAlarm: "Next alarm",
+  noAlarmScheduled: "No alarm scheduled",
 };
 
 const ar: Dict = {
