@@ -25,13 +25,16 @@ export interface AppState {
   language: Language;
   theme: Theme;
   notifications: boolean;
+  alarmEnabled: boolean;
+  alarmTime: string; // "HH:MM" 24h
+  lastAlarmDate: string | null; // YYYY-MM-DD when alarm last fired
   notes: QuickNote[];
   nurses: Nurse[];
   evacuationQueue: string[]; // nurse ids in order
   evacuationHistory: EvacuationLog[];
 }
 
-const KEY = "shiftflow:state:v1";
+const KEY = "shiftflow:state:v2";
 
 export const defaultState: AppState = {
   onboarded: false,
@@ -39,12 +42,15 @@ export const defaultState: AppState = {
   language: "en",
   theme: "light",
   notifications: false,
+  alarmEnabled: false,
+  alarmTime: "07:00",
+  lastAlarmDate: null,
   notes: [],
   nurses: [
-    { id: "n1", name: "Sara" },
-    { id: "n2", name: "Ahmed" },
-    { id: "n3", name: "Lina" },
-    { id: "n4", name: "Omar" },
+    { id: "n1", name: "Mohamed" },
+    { id: "n2", name: "Cheikh" },
+    { id: "n3", name: "Amel" },
+    { id: "n4", name: "Nourhouda" },
   ],
   evacuationQueue: ["n1", "n2", "n3", "n4"],
   evacuationHistory: [],
