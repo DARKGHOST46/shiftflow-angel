@@ -33,6 +33,7 @@ function Home() {
   const hours = shiftsThisMonth * 24;
   const nextNurseId = state.evacuationQueue[0];
   const nextNurse = state.nurses.find((n) => n.id === nextNurseId);
+  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
 
   return (
     <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
