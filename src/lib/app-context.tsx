@@ -49,6 +49,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAnchorDate: (anchorDate) => setState((p) => ({ ...p, anchorDate })),
       setOnboarded: (onboarded) => setState((p) => ({ ...p, onboarded })),
       setNotifications: (notifications) => setState((p) => ({ ...p, notifications })),
+      setAlarmEnabled: (alarmEnabled) => setState((p) => ({ ...p, alarmEnabled })),
+      setAlarmTime: (alarmTime) => setState((p) => ({ ...p, alarmTime })),
+      setLastAlarmDate: (lastAlarmDate) => setState((p) => ({ ...p, lastAlarmDate })),
       addNote: (text) =>
         setState((p) => {
           const note: QuickNote = { id: crypto.randomUUID(), text, createdAt: Date.now() };
