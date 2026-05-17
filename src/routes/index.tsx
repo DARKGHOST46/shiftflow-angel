@@ -6,7 +6,8 @@ import { AnimatedStatCard } from "@/components/animated-stat-card";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate } from "@/lib/storage";
 import { getShiftDaysInMonth } from "@/lib/shift-engine";
-import { CalendarDays, Clock, Siren } from "lucide-react";
+import { getNextAlarm } from "@/lib/alarm";
+import { CalendarDays, Clock, Siren, AlarmClock } from "lucide-react";
 import { GlassCard } from "@/components/glass-card";
 
 export const Route = createFileRoute("/")({
