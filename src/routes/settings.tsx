@@ -23,8 +23,9 @@ export const Route = createFileRoute("/settings")({
 });
 
 function Settings() {
-  const { state, setTheme, setLanguage, setAnchorDate, setNotifications, t } = useApp();
+  const { state, setTheme, setLanguage, setAnchorDate, setNotifications, setAlarmEnabled, setAlarmTime, t } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
+  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
 
   const toggleNotifications = async (v: boolean) => {
     if (v && "Notification" in window) {
