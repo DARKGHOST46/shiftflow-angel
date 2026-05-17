@@ -6,7 +6,8 @@ import { AnimatedStatCard } from "@/components/animated-stat-card";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate } from "@/lib/storage";
 import { getShiftDaysInMonth } from "@/lib/shift-engine";
-import { CalendarDays, Clock, Siren } from "lucide-react";
+import { getNextAlarm } from "@/lib/alarm";
+import { CalendarDays, Clock, Siren, AlarmClock } from "lucide-react";
 import { GlassCard } from "@/components/glass-card";
 
 export const Route = createFileRoute("/")({
@@ -32,6 +33,7 @@ function Home() {
   const hours = shiftsThisMonth * 24;
   const nextNurseId = state.evacuationQueue[0];
   const nextNurse = state.nurses.find((n) => n.id === nextNurseId);
+  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
 
   return (
     <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
@@ -59,6 +61,24 @@ function Home() {
         </div>
         <p className="text-2xl font-semibold text-gradient">
           {nextNurse?.name ?? "—"}
+        </p>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="flex items-center gap-2 mb-3">
+          <AlarmClock className="size-4 text-primary" />
+          <h3 className="font-semibold">{t("nextAlarm")}</h3>
+        </div>
+        <p className="text-lg font-semibold text-gradient">
+          {nextAlarm
+            ? nextAlarm.toLocaleString(state.language, {
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : t("noAlarmScheduled")}
         </p>
       </GlassCard>
 

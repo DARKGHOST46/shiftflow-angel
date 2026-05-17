@@ -67,6 +67,13 @@ const en: Dict = {
   noHistory: "No completed turns yet",
   upcoming: "Upcoming",
   today: "Today",
+  shiftAlarm: "Shift alarm",
+  alarm: "Alarm",
+  alarmTime: "Alarm time",
+  enableAlarm: "Enable shift alarm",
+  alarmHelp: "Rings only on shift days at the chosen time.",
+  nextAlarm: "Next alarm",
+  noAlarmScheduled: "No alarm scheduled",
 };
 
 const ar: Dict = {
@@ -134,6 +141,13 @@ const ar: Dict = {
   noHistory: "لا أدوار مكتملة بعد",
   upcoming: "القادم",
   today: "اليوم",
+  shiftAlarm: "منبه الوردية",
+  alarm: "المنبه",
+  alarmTime: "وقت المنبه",
+  enableAlarm: "تفعيل منبه الوردية",
+  alarmHelp: "يرن فقط في أيام الوردية في الوقت المحدد.",
+  nextAlarm: "المنبه القادم",
+  noAlarmScheduled: "لا يوجد منبه مجدول",
 };
 
 const fr: Dict = {
@@ -201,6 +215,13 @@ const fr: Dict = {
   noHistory: "Aucun tour terminé",
   upcoming: "À venir",
   today: "Aujourd'hui",
+  shiftAlarm: "Alarme de garde",
+  alarm: "Alarme",
+  alarmTime: "Heure de l'alarme",
+  enableAlarm: "Activer l'alarme de garde",
+  alarmHelp: "Sonne uniquement les jours de garde à l'heure choisie.",
+  nextAlarm: "Prochaine alarme",
+  noAlarmScheduled: "Aucune alarme planifiée",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };

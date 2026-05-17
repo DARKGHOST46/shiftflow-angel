@@ -4,10 +4,12 @@ import { OnboardingScreen } from "@/components/onboarding-screen";
 import { type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouterState } from "@tanstack/react-router";
+import { useAlarmScheduler } from "@/hooks/use-alarm-scheduler";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state } = useApp();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useAlarmScheduler();
 
   if (!state.onboarded || !state.anchorDate) {
     return <OnboardingScreen />;

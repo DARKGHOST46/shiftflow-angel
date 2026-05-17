@@ -11,6 +11,9 @@ type Ctx = {
   setAnchorDate: (iso: string) => void;
   setOnboarded: (v: boolean) => void;
   setNotifications: (v: boolean) => void;
+  setAlarmEnabled: (v: boolean) => void;
+  setAlarmTime: (v: string) => void;
+  setLastAlarmDate: (v: string | null) => void;
   addNote: (text: string) => void;
   removeNote: (id: string) => void;
   completeEvacuationTurn: () => void;
@@ -46,6 +49,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAnchorDate: (anchorDate) => setState((p) => ({ ...p, anchorDate })),
       setOnboarded: (onboarded) => setState((p) => ({ ...p, onboarded })),
       setNotifications: (notifications) => setState((p) => ({ ...p, notifications })),
+      setAlarmEnabled: (alarmEnabled) => setState((p) => ({ ...p, alarmEnabled })),
+      setAlarmTime: (alarmTime) => setState((p) => ({ ...p, alarmTime })),
+      setLastAlarmDate: (lastAlarmDate) => setState((p) => ({ ...p, lastAlarmDate })),
       addNote: (text) =>
         setState((p) => {
           const note: QuickNote = { id: crypto.randomUUID(), text, createdAt: Date.now() };

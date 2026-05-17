@@ -8,7 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LANGUAGES } from "@/lib/i18n";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
-import { Moon, Sun, Languages, CalendarCheck, Bell, Info } from "lucide-react";
+import { Moon, Sun, Languages, CalendarCheck, Bell, Info, AlarmClock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { getNextAlarm } from "@/lib/alarm";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -21,8 +23,9 @@ export const Route = createFileRoute("/settings")({
 });
 
 function Settings() {
-  const { state, setTheme, setLanguage, setAnchorDate, setNotifications, t } = useApp();
+  const { state, setTheme, setLanguage, setAnchorDate, setNotifications, setAlarmEnabled, setAlarmTime, t } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
+  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
 
   const toggleNotifications = async (v: boolean) => {
     if (v && "Notification" in window) {
@@ -104,6 +107,46 @@ function Settings() {
         <Row icon={Bell} label={t("notifications")}>
           <Switch checked={state.notifications} onCheckedChange={toggleNotifications} />
         </Row>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="space-y-4">
+          <Row icon={AlarmClock} label={t("enableAlarm")}>
+            <Switch
+              checked={state.alarmEnabled}
+              onCheckedChange={async (v) => {
+                if (v && "Notification" in window && Notification.permission === "default") {
+                  await Notification.requestPermission();
+                }
+                setAlarmEnabled(v);
+              }}
+            />
+          </Row>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">{t("alarmTime")}</span>
+            <Input
+              type="time"
+              value={state.alarmTime}
+              onChange={(e) => setAlarmTime(e.target.value)}
+              className="w-32 rounded-full text-center"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">{t("alarmHelp")}</p>
+          <div className="rounded-2xl bg-secondary/40 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("nextAlarm")}</span>
+            <span className="text-sm font-semibold text-gradient">
+              {nextAlarm
+                ? nextAlarm.toLocaleString(state.language, {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : t("noAlarmScheduled")}
+            </span>
+          </div>
+        </div>
       </GlassCard>
 
       <GlassCard>
