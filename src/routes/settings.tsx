@@ -8,7 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LANGUAGES } from "@/lib/i18n";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
-import { Moon, Sun, Languages, CalendarCheck, Bell, Info } from "lucide-react";
+import { Moon, Sun, Languages, CalendarCheck, Bell, Info, AlarmClock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { getNextAlarm } from "@/lib/alarm";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
