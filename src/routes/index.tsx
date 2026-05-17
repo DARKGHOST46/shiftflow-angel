@@ -64,6 +64,24 @@ function Home() {
         </p>
       </GlassCard>
 
+      <GlassCard>
+        <div className="flex items-center gap-2 mb-3">
+          <AlarmClock className="size-4 text-primary" />
+          <h3 className="font-semibold">{t("nextAlarm")}</h3>
+        </div>
+        <p className="text-lg font-semibold text-gradient">
+          {nextAlarm
+            ? nextAlarm.toLocaleString(state.language, {
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : t("noAlarmScheduled")}
+        </p>
+      </GlassCard>
+
       <QuickNotesWidget />
     </div>
   );
