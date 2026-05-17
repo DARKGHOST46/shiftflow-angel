@@ -215,6 +215,13 @@ const fr: Dict = {
   noHistory: "Aucun tour terminé",
   upcoming: "À venir",
   today: "Aujourd'hui",
+  shiftAlarm: "Alarme de garde",
+  alarm: "Alarme",
+  alarmTime: "Heure de l'alarme",
+  enableAlarm: "Activer l'alarme de garde",
+  alarmHelp: "Sonne uniquement les jours de garde à l'heure choisie.",
+  nextAlarm: "Prochaine alarme",
+  noAlarmScheduled: "Aucune alarme planifiée",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };
