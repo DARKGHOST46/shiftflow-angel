@@ -20,7 +20,8 @@ const DESTINATIONS: Destination[] = ["oran", "ain_temouchent"];
 
 function Evacuation() {
   const { state, completeEvacuationTurn, moveNurse, setEvacuationDestination, t } = useApp();
-  const queueNurses = state.evacuationQueue
+  const queueIds = state.evacuationQueues[state.evacuationDestination] ?? [];
+  const queueNurses = queueIds
     .map((id) => state.nurses.find((n) => n.id === id))
     .filter((n): n is { id: string; name: string } => !!n);
   const next = queueNurses[0];
