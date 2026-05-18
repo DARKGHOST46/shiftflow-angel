@@ -32,12 +32,12 @@ export interface AppState {
   lastAlarmDate: string | null;
   notes: QuickNote[];
   nurses: Nurse[];
-  evacuationQueue: string[];
+  evacuationQueues: Record<Destination, string[]>;
   evacuationHistory: EvacuationLog[];
   evacuationDestination: Destination;
 }
 
-const KEY = "shiftflow:state:v3";
+const KEY = "shiftflow:state:v4";
 
 export const defaultState: AppState = {
   onboarded: false,
@@ -55,7 +55,10 @@ export const defaultState: AppState = {
     { id: "n3", name: "Amel" },
     { id: "n4", name: "Nourhouda" },
   ],
-  evacuationQueue: ["n1", "n2", "n3", "n4"],
+  evacuationQueues: {
+    oran: ["n1", "n2", "n3", "n4"],
+    ain_temouchent: ["n1", "n2", "n3", "n4"],
+  },
   evacuationHistory: [],
   evacuationDestination: "oran",
 };

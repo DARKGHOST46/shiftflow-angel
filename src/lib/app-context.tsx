@@ -64,28 +64,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setState((p) => ({ ...p, evacuationDestination })),
       moveNurse: (id, direction) =>
         setState((p) => {
-          const queue = [...p.evacuationQueue];
+          const dest = p.evacuationDestination;
+          const queue = [...(p.evacuationQueues[dest] ?? [])];
           const idx = queue.indexOf(id);
           const target = idx + direction;
           if (idx < 0 || target < 0 || target >= queue.length) return p;
           [queue[idx], queue[target]] = [queue[target], queue[idx]];
-          return { ...p, evacuationQueue: queue };
+          return { ...p, evacuationQueues: { ...p.evacuationQueues, [dest]: queue } };
         }),
       completeEvacuationTurn: () =>
         setState((p) => {
-          if (p.evacuationQueue.length === 0) return p;
-          const [first, ...rest] = p.evacuationQueue;
+          const dest = p.evacuationDestination;
+          const queue = p.evacuationQueues[dest] ?? [];
+          if (queue.length === 0) return p;
+          const [first, ...rest] = queue;
           const nurse = p.nurses.find((n) => n.id === first);
           if (!nurse) return p;
           return {
             ...p,
-            evacuationQueue: [...rest, first],
+            evacuationQueues: { ...p.evacuationQueues, [dest]: [...rest, first] },
             evacuationHistory: [
               {
                 id: crypto.randomUUID(),
                 nurseId: nurse.id,
                 nurseName: nurse.name,
-                destination: p.evacuationDestination,
+                destination: dest,
                 completedAt: Date.now(),
               },
               ...p.evacuationHistory,
