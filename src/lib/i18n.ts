@@ -154,6 +154,12 @@ const ar: Dict = {
   alarmHelp: "يرن فقط في أيام الوردية في الوقت المحدد.",
   nextAlarm: "المنبه القادم",
   noAlarmScheduled: "لا يوجد منبه مجدول",
+  destination: "الوجهة",
+  oran: "وهران",
+  ain_temouchent: "عين تموشنت",
+  moveUp: "تحريك للأعلى",
+  moveDown: "تحريك للأسفل",
+  reorderHelp: "استخدم الأسهم لإعادة ترتيب القائمة.",
 };
 
 const fr: Dict = {
