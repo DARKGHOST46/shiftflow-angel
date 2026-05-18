@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { loadState, saveState, type AppState, type Language, type Theme, type QuickNote } from "@/lib/storage";
+import { loadState, saveState, type AppState, type Language, type Theme, type QuickNote, type Destination } from "@/lib/storage";
 import { isRTL, t as translate, type TKey } from "@/lib/i18n";
 
 type Ctx = {
@@ -16,6 +16,8 @@ type Ctx = {
   setLastAlarmDate: (v: string | null) => void;
   addNote: (text: string) => void;
   removeNote: (id: string) => void;
+  setEvacuationDestination: (d: Destination) => void;
+  moveNurse: (id: string, direction: -1 | 1) => void;
   completeEvacuationTurn: () => void;
 };
 
@@ -58,6 +60,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return { ...p, notes: [note, ...p.notes].slice(0, 50) };
         }),
       removeNote: (id) => setState((p) => ({ ...p, notes: p.notes.filter((n) => n.id !== id) })),
+      setEvacuationDestination: (evacuationDestination) =>
+        setState((p) => ({ ...p, evacuationDestination })),
+      moveNurse: (id, direction) =>
+        setState((p) => {
+          const queue = [...p.evacuationQueue];
+          const idx = queue.indexOf(id);
+          const target = idx + direction;
+          if (idx < 0 || target < 0 || target >= queue.length) return p;
+          [queue[idx], queue[target]] = [queue[target], queue[idx]];
+          return { ...p, evacuationQueue: queue };
+        }),
       completeEvacuationTurn: () =>
         setState((p) => {
           if (p.evacuationQueue.length === 0) return p;
@@ -68,7 +81,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ...p,
             evacuationQueue: [...rest, first],
             evacuationHistory: [
-              { id: crypto.randomUUID(), nurseId: nurse.id, nurseName: nurse.name, completedAt: Date.now() },
+              {
+                id: crypto.randomUUID(),
+                nurseId: nurse.id,
+                nurseName: nurse.name,
+                destination: p.evacuationDestination,
+                completedAt: Date.now(),
+              },
               ...p.evacuationHistory,
             ].slice(0, 100),
           };
