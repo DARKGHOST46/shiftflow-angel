@@ -234,6 +234,12 @@ const fr: Dict = {
   alarmHelp: "Sonne uniquement les jours de garde à l'heure choisie.",
   nextAlarm: "Prochaine alarme",
   noAlarmScheduled: "Aucune alarme planifiée",
+  destination: "Destination",
+  oran: "Oran",
+  ain_temouchent: "Aïn Témouchent",
+  moveUp: "Monter",
+  moveDown: "Descendre",
+  reorderHelp: "Utilisez les flèches pour réorganiser la file.",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };
