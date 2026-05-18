@@ -3,8 +3,10 @@ import { AppLayout } from "@/components/app-layout";
 import { useApp } from "@/lib/app-context";
 import { GlassCard } from "@/components/glass-card";
 import { Button } from "@/components/ui/button";
-import { Siren, CheckCircle2, History } from "lucide-react";
+import { Siren, CheckCircle2, History, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import type { Destination } from "@/lib/storage";
 
 export const Route = createFileRoute("/evacuation")({
   component: () => (
@@ -14,8 +16,10 @@ export const Route = createFileRoute("/evacuation")({
   ),
 });
 
+const DESTINATIONS: Destination[] = ["oran", "ain_temouchent"];
+
 function Evacuation() {
-  const { state, completeEvacuationTurn, t } = useApp();
+  const { state, completeEvacuationTurn, moveNurse, setEvacuationDestination, t } = useApp();
   const queueNurses = state.evacuationQueue
     .map((id) => state.nurses.find((n) => n.id === id))
     .filter((n): n is { id: string; name: string } => !!n);
@@ -45,6 +49,30 @@ function Evacuation() {
             <p className="text-3xl font-semibold text-gradient">{next?.name ?? "—"}</p>
           </div>
         </div>
+
+        <div className="relative mt-5">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="size-4 text-primary" />
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">{t("destination")}</p>
+          </div>
+          <div className="flex gap-2 bg-secondary/50 rounded-full p-1">
+            {DESTINATIONS.map((d) => (
+              <button
+                key={d}
+                onClick={() => setEvacuationDestination(d)}
+                className={cn(
+                  "flex-1 px-3 py-2 rounded-full text-sm font-medium transition-colors",
+                  state.evacuationDestination === d
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground",
+                )}
+              >
+                {t(d)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <Button
           onClick={completeEvacuationTurn}
           className="w-full mt-5 rounded-2xl glow h-12 text-base"
@@ -55,7 +83,8 @@ function Evacuation() {
       </GlassCard>
 
       <GlassCard>
-        <h3 className="font-semibold mb-3">{t("upcoming")}</h3>
+        <h3 className="font-semibold mb-1">{t("upcoming")}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{t("reorderHelp")}</p>
         <div className="space-y-2">
           {queueNurses.map((n, i) => (
             <motion.div
@@ -66,7 +95,27 @@ function Evacuation() {
               <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-semibold">
                 {i + 1}
               </div>
-              <span className="font-medium">{n.name}</span>
+              <span className="flex-1 font-medium">{n.name}</span>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label={t("moveUp")}
+                disabled={i === 0}
+                onClick={() => moveNurse(n.id, -1)}
+                className="rounded-full h-8 w-8"
+              >
+                <ChevronUp className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label={t("moveDown")}
+                disabled={i === queueNurses.length - 1}
+                onClick={() => moveNurse(n.id, 1)}
+                className="rounded-full h-8 w-8"
+              >
+                <ChevronDown className="size-4" />
+              </Button>
             </motion.div>
           ))}
         </div>
@@ -88,11 +137,22 @@ function Evacuation() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0 }}
-                className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2 text-sm gap-2"
               >
-                <span className="font-medium">{h.nurseName}</span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(h.completedAt).toLocaleString()}
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{h.nurseName}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {h.destination ? t(h.destination) : "—"}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {new Date(h.completedAt).toLocaleString(state.language, {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
                 </span>
               </motion.div>
             ))}

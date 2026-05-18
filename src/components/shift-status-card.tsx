@@ -6,6 +6,7 @@ import {
   getCurrentShiftEnd,
   getDayType,
   getNextShiftStart,
+  isOnShift,
 } from "@/lib/shift-engine";
 import { motion } from "framer-motion";
 import { Activity, Moon } from "lucide-react";
@@ -16,8 +17,8 @@ export function ShiftStatusCard() {
   if (!anchor) return null;
 
   const now = new Date();
+  const onShift = isOnShift(now, anchor);
   const type = getDayType(now, anchor);
-  const onShift = type === "shift";
   const end = getCurrentShiftEnd(anchor, now);
   const next = getNextShiftStart(anchor, now);
   const target = onShift && end ? end : next;

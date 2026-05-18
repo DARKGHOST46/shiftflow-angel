@@ -74,6 +74,12 @@ const en: Dict = {
   alarmHelp: "Rings only on shift days at the chosen time.",
   nextAlarm: "Next alarm",
   noAlarmScheduled: "No alarm scheduled",
+  destination: "Destination",
+  oran: "Oran",
+  ain_temouchent: "Aïn Témouchent",
+  moveUp: "Move up",
+  moveDown: "Move down",
+  reorderHelp: "Use the arrows to reorder the queue.",
 };
 
 const ar: Dict = {
@@ -148,6 +154,12 @@ const ar: Dict = {
   alarmHelp: "يرن فقط في أيام الوردية في الوقت المحدد.",
   nextAlarm: "المنبه القادم",
   noAlarmScheduled: "لا يوجد منبه مجدول",
+  destination: "الوجهة",
+  oran: "وهران",
+  ain_temouchent: "عين تموشنت",
+  moveUp: "تحريك للأعلى",
+  moveDown: "تحريك للأسفل",
+  reorderHelp: "استخدم الأسهم لإعادة ترتيب القائمة.",
 };
 
 const fr: Dict = {
@@ -222,6 +234,12 @@ const fr: Dict = {
   alarmHelp: "Sonne uniquement les jours de garde à l'heure choisie.",
   nextAlarm: "Prochaine alarme",
   noAlarmScheduled: "Aucune alarme planifiée",
+  destination: "Destination",
+  oran: "Oran",
+  ain_temouchent: "Aïn Témouchent",
+  moveUp: "Monter",
+  moveDown: "Descendre",
+  reorderHelp: "Utilisez les flèches pour réorganiser la file.",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };

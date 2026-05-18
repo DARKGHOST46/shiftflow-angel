@@ -1,5 +1,6 @@
 export type Language = "en" | "ar" | "fr";
 export type Theme = "light" | "dark";
+export type Destination = "oran" | "ain_temouchent";
 
 export interface QuickNote {
   id: string;
@@ -16,25 +17,27 @@ export interface EvacuationLog {
   id: string;
   nurseId: string;
   nurseName: string;
+  destination: Destination;
   completedAt: number;
 }
 
 export interface AppState {
   onboarded: boolean;
-  anchorDate: string | null; // ISO date YYYY-MM-DD
+  anchorDate: string | null;
   language: Language;
   theme: Theme;
   notifications: boolean;
   alarmEnabled: boolean;
-  alarmTime: string; // "HH:MM" 24h
-  lastAlarmDate: string | null; // YYYY-MM-DD when alarm last fired
+  alarmTime: string;
+  lastAlarmDate: string | null;
   notes: QuickNote[];
   nurses: Nurse[];
-  evacuationQueue: string[]; // nurse ids in order
+  evacuationQueue: string[];
   evacuationHistory: EvacuationLog[];
+  evacuationDestination: Destination;
 }
 
-const KEY = "shiftflow:state:v2";
+const KEY = "shiftflow:state:v3";
 
 export const defaultState: AppState = {
   onboarded: false,
@@ -54,6 +57,7 @@ export const defaultState: AppState = {
   ],
   evacuationQueue: ["n1", "n2", "n3", "n4"],
   evacuationHistory: [],
+  evacuationDestination: "oran",
 };
 
 export function loadState(): AppState {
