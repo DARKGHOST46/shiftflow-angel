@@ -74,6 +74,12 @@ const en: Dict = {
   alarmHelp: "Rings only on shift days at the chosen time.",
   nextAlarm: "Next alarm",
   noAlarmScheduled: "No alarm scheduled",
+  destination: "Destination",
+  oran: "Oran",
+  ain_temouchent: "Aïn Témouchent",
+  moveUp: "Move up",
+  moveDown: "Move down",
+  reorderHelp: "Use the arrows to reorder the queue.",
 };
 
 const ar: Dict = {
