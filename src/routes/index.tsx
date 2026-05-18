@@ -31,7 +31,7 @@ function Home() {
   const now = new Date();
   const shiftsThisMonth = anchor ? getShiftDaysInMonth(now.getFullYear(), now.getMonth(), anchor).length : 0;
   const hours = shiftsThisMonth * 24;
-  const nextNurseId = state.evacuationQueue[0];
+  const nextNurseId = state.evacuationQueues[state.evacuationDestination]?.[0];
   const nextNurse = state.nurses.find((n) => n.id === nextNurseId);
   const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
 
