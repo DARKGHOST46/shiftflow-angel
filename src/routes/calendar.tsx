@@ -2,7 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate } from "@/lib/storage";
-import { getDayType, getMonthMatrix, getShiftDaysInMonth } from "@/lib/shift-engine";
+import {
+  getMonthMatrix,
+  getSlotForDate,
+  getSlotStartOn,
+  getWorkDaysInMonth,
+} from "@/lib/shift-engine";
+import { getSystem } from "@/lib/shift-systems";
 import { GlassCard } from "@/components/glass-card";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -19,12 +25,17 @@ export const Route = createFileRoute("/calendar")({
 });
 
 function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 function CalendarPage() {
   const { state, t } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
+  const system = getSystem(state.systemId);
   const [cursor, setCursor] = useState(() => new Date());
   const [selected, setSelected] = useState<Date>(() => new Date());
 
@@ -32,8 +43,10 @@ function CalendarPage() {
 
   const weeks = getMonthMatrix(cursor.getFullYear(), cursor.getMonth());
   const monthLabel = cursor.toLocaleDateString(state.language, { month: "long", year: "numeric" });
-  const total = getShiftDaysInMonth(cursor.getFullYear(), cursor.getMonth(), anchor).length;
-  const selType = getDayType(selected, anchor);
+  const total = getWorkDaysInMonth(cursor.getFullYear(), cursor.getMonth(), system, anchor).length;
+  const selSlot = getSlotForDate(selected, system, anchor);
+  const selStart = selSlot.kind !== "rest" ? getSlotStartOn(selected, selSlot) : null;
+  const selEnd = selStart ? new Date(selStart.getTime() + selSlot.durationH * 3600_000) : null;
 
   const weekdayLabels = (() => {
     const fmt = new Intl.DateTimeFormat(state.language, { weekday: "short" });
@@ -43,12 +56,25 @@ function CalendarPage() {
   return (
     <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight capitalize">{monthLabel}</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight capitalize">{monthLabel}</h1>
+          <p className="text-xs text-muted-foreground">{t(system.nameKey)}</p>
+        </div>
         <div className="flex gap-2">
-          <Button size="icon" variant="ghost" className="rounded-full glass" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full glass"
+            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+          >
             <ChevronLeft className="size-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="rounded-full glass" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full glass"
+            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+          >
             <ChevronRight className="size-4" />
           </Button>
         </div>
@@ -57,7 +83,10 @@ function CalendarPage() {
       <GlassCard>
         <div className="grid grid-cols-7 gap-1 mb-2">
           {weekdayLabels.map((w) => (
-            <div key={w} className="text-center text-[10px] uppercase tracking-widest text-muted-foreground py-1">
+            <div
+              key={w}
+              className="text-center text-[10px] uppercase tracking-widest text-muted-foreground py-1"
+            >
               {w}
             </div>
           ))}
@@ -65,8 +94,8 @@ function CalendarPage() {
         <div className="grid grid-cols-7 gap-1">
           {weeks.flat().map((d, i) => {
             const inMonth = d.getMonth() === cursor.getMonth();
-            const type = getDayType(d, anchor);
-            const isShift = type === "shift";
+            const slot = getSlotForDate(d, system, anchor);
+            const isWork = slot.kind !== "rest";
             const isSel = sameDay(d, selected);
             const isToday = sameDay(d, new Date());
             return (
@@ -78,14 +107,21 @@ function CalendarPage() {
                   "relative aspect-square rounded-xl text-sm font-medium transition-colors flex items-center justify-center",
                   !inMonth && "opacity-30",
                   isSel && "ring-2 ring-primary",
-                  isShift
-                    ? "bg-primary/15 text-foreground"
-                    : "bg-secondary/40 text-muted-foreground",
                 )}
+                style={
+                  isWork
+                    ? {
+                        backgroundColor: `color-mix(in oklab, var(${slot.colorVar}) 22%, transparent)`,
+                      }
+                    : undefined
+                }
               >
-                <span>{d.getDate()}</span>
-                {isShift && (
-                  <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                <span className={cn(!isWork && "text-muted-foreground")}>{d.getDate()}</span>
+                {isWork && (
+                  <span
+                    className="absolute bottom-1 h-1 w-1 rounded-full"
+                    style={{ background: `var(${slot.colorVar})` }}
+                  />
                 )}
                 {isToday && (
                   <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-accent" />
@@ -101,23 +137,48 @@ function CalendarPage() {
         <div className="flex items-center justify-between mt-2">
           <div>
             <p className="text-2xl font-semibold">
-              {selected.toLocaleDateString(state.language, { weekday: "long", day: "numeric", month: "long" })}
+              {selected.toLocaleDateString(state.language, {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {selType === "shift" ? t("shiftDay") : t(selType as "rest1" | "rest2" | "rest3" | "rest4")}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">{t(selSlot.labelKey)}</p>
+            {selStart && selEnd && (
+              <p className="text-xs text-muted-foreground mt-1 tabular-nums">
+                {selStart.toLocaleTimeString(state.language, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+                {" → "}
+                {selEnd.toLocaleTimeString(state.language, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+                {" • "}
+                {selSlot.durationH}h
+              </p>
+            )}
           </div>
           <div
             className="h-12 w-12 rounded-2xl flex items-center justify-center text-white font-semibold"
-            style={{ background: selType === "shift" ? "var(--shift)" : "var(--rest)" }}
+            style={{ background: `var(${selSlot.colorVar})` }}
           >
-            {selType === "shift" ? "24" : selType.replace("rest", "R")}
+            {selSlot.kind === "shift24"
+              ? "24"
+              : selSlot.kind === "night"
+                ? `${selSlot.durationH}N`
+                : selSlot.kind === "day"
+                  ? `${selSlot.durationH}D`
+                  : "R"}
           </div>
         </div>
       </GlassCard>
 
       <div className="text-center text-sm text-muted-foreground">
-        {total} {t("shiftDay")}{total > 1 ? "s" : ""} · {monthLabel}
+        {total} {t("shiftDay")} · {monthLabel}
       </div>
     </div>
   );

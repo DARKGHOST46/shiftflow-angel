@@ -5,32 +5,32 @@ import { Calendar } from "@/components/ui/calendar";
 import { useApp } from "@/lib/app-context";
 import { LANGUAGES } from "@/lib/i18n";
 import { toAnchorIso } from "@/lib/storage";
-import { Sparkles, Languages, CalendarCheck, ChevronRight, ChevronLeft } from "lucide-react";
+import { SYSTEM_LIST, type SystemId } from "@/lib/shift-systems";
+import {
+  Sparkles,
+  Languages,
+  CalendarCheck,
+  ChevronRight,
+  ChevronLeft,
+  Layers,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function OnboardingScreen() {
-  const { t, setLanguage, setAnchorDate, setOnboarded, state } = useApp();
+  const { t, setLanguage, setAnchorDate, setSystemId, setOnboarded, state } = useApp();
   const [step, setStep] = useState(0);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [pickedSystem, setPickedSystem] = useState<SystemId>(state.systemId);
 
   const steps = [
-    {
-      icon: Sparkles,
-      title: t("welcome"),
-      subtitle: t("onboardingIntro"),
-    },
-    {
-      icon: Languages,
-      title: t("onboardingLang"),
-    },
-    {
-      icon: CalendarCheck,
-      title: t("onboardingAnchor"),
-      subtitle: t("anchorHelp"),
-    },
+    { icon: Sparkles, title: t("welcome"), subtitle: t("onboardingIntro") },
+    { icon: Languages, title: t("onboardingLang") },
+    { icon: Layers, title: t("onboardingSystem") },
+    { icon: CalendarCheck, title: t("onboardingAnchor"), subtitle: t("anchorHelp") },
   ];
 
   const finish = () => {
+    setSystemId(pickedSystem);
     if (date) setAnchorDate(toAnchorIso(date));
     setOnboarded(true);
   };
@@ -39,7 +39,7 @@ export function OnboardingScreen() {
   const Icon = Active.icon;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5">
+    <div className="min-h-screen flex items-center justify-center px-5 py-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -69,9 +69,7 @@ export function OnboardingScreen() {
             <div className="h-16 w-16 rounded-3xl flex items-center justify-center bg-primary text-primary-foreground glow mb-5">
               <Icon className="size-7" />
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gradient">
-              {Active.title}
-            </h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-gradient">{Active.title}</h1>
             {Active.subtitle && (
               <p className="text-muted-foreground mt-2 leading-relaxed">{Active.subtitle}</p>
             )}
@@ -97,6 +95,26 @@ export function OnboardingScreen() {
             )}
 
             {step === 2 && (
+              <div className="mt-6 space-y-2">
+                {SYSTEM_LIST.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setPickedSystem(s.id)}
+                    className={cn(
+                      "w-full text-left rounded-2xl px-4 py-3 transition-all",
+                      pickedSystem === s.id
+                        ? "bg-primary text-primary-foreground glow"
+                        : "bg-secondary/60 hover:bg-secondary",
+                    )}
+                  >
+                    <div className="font-semibold">{t(s.nameKey)}</div>
+                    <div className="text-xs opacity-80 mt-0.5">{t(s.descKey)}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {step === 3 && (
               <div className="mt-5 rounded-2xl bg-background/50 backdrop-blur p-2 flex justify-center">
                 <Calendar
                   mode="single"
