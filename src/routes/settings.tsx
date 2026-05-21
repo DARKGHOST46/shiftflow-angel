@@ -8,7 +8,18 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LANGUAGES } from "@/lib/i18n";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
-import { Moon, Sun, Languages, CalendarCheck, Bell, Info, AlarmClock } from "lucide-react";
+import { SYSTEM_LIST } from "@/lib/shift-systems";
+import {
+  Moon,
+  Sun,
+  Languages,
+  CalendarCheck,
+  Bell,
+  Info,
+  AlarmClock,
+  Layers,
+  Banknote,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getNextAlarm } from "@/lib/alarm";
 import { cn } from "@/lib/utils";
@@ -23,9 +34,24 @@ export const Route = createFileRoute("/settings")({
 });
 
 function Settings() {
-  const { state, setTheme, setLanguage, setAnchorDate, setNotifications, setAlarmEnabled, setAlarmTime, t } = useApp();
+  const {
+    state,
+    setTheme,
+    setLanguage,
+    setAnchorDate,
+    setSystemId,
+    setNotifications,
+    setAlarmEnabled,
+    setAlarmTime,
+    setAlarmLeadMinutes,
+    setHourlyRate,
+    setNightBonusPct,
+    t,
+  } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
-  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
+  const nextAlarm = state.alarmEnabled
+    ? getNextAlarm(anchor, state.alarmTime, state.systemId, state.alarmLeadMinutes)
+    : null;
 
   const toggleNotifications = async (v: boolean) => {
     if (v && "Notification" in window) {
@@ -44,6 +70,31 @@ function Settings() {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("settings")}</h1>
       </header>
+
+      <GlassCard>
+        <Row icon={Layers} label={t("shiftSystem")}>
+          <span className="text-sm font-semibold text-gradient">
+            {t(SYSTEM_LIST.find((s) => s.id === state.systemId)?.nameKey ?? "sys24h")}
+          </span>
+        </Row>
+        <div className="mt-3 space-y-2">
+          {SYSTEM_LIST.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSystemId(s.id)}
+              className={cn(
+                "w-full text-left rounded-2xl px-4 py-3 transition-all",
+                state.systemId === s.id
+                  ? "bg-primary text-primary-foreground glow"
+                  : "bg-secondary/50 hover:bg-secondary",
+              )}
+            >
+              <div className="font-semibold">{t(s.nameKey)}</div>
+              <div className="text-xs opacity-80 mt-0.5">{t(s.descKey)}</div>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
 
       <GlassCard>
         <Row icon={state.theme === "dark" ? Moon : Sun} label={t("theme")}>
@@ -73,7 +124,9 @@ function Settings() {
                 onClick={() => setLanguage(l.code)}
                 className={cn(
                   "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                  state.language === l.code ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                  state.language === l.code
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {l.code.toUpperCase()}
@@ -122,18 +175,35 @@ function Settings() {
               }}
             />
           </Row>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">{t("alarmTime")}</span>
-            <Input
-              type="time"
-              value={state.alarmTime}
-              onChange={(e) => setAlarmTime(e.target.value)}
-              className="w-32 rounded-full text-center"
-            />
-          </div>
+          {state.systemId === "24h_4rest" ? (
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">{t("alarmTime")}</span>
+              <Input
+                type="time"
+                value={state.alarmTime}
+                onChange={(e) => setAlarmTime(e.target.value)}
+                className="w-32 rounded-full text-center"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">{t("alarm")} (min)</span>
+              <Input
+                type="number"
+                min={5}
+                max={240}
+                step={5}
+                value={state.alarmLeadMinutes}
+                onChange={(e) => setAlarmLeadMinutes(Number(e.target.value) || 0)}
+                className="w-24 rounded-full text-center"
+              />
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">{t("alarmHelp")}</p>
           <div className="rounded-2xl bg-secondary/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("nextAlarm")}</span>
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">
+              {t("nextAlarm")}
+            </span>
             <span className="text-sm font-semibold text-gradient">
               {nextAlarm
                 ? nextAlarm.toLocaleString(state.language, {
@@ -146,6 +216,35 @@ function Settings() {
                   })
                 : t("noAlarmScheduled")}
             </span>
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="space-y-4">
+          <Row icon={Banknote} label={t("salary")}>
+            <span className="text-xs text-muted-foreground">{t("hourlyRate")}</span>
+          </Row>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">{t("hourlyRate")}</span>
+            <Input
+              type="number"
+              min={0}
+              value={state.hourlyRate}
+              onChange={(e) => setHourlyRate(Number(e.target.value) || 0)}
+              className="w-28 rounded-full text-center"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">{t("nightBonus")}</span>
+            <Input
+              type="number"
+              min={0}
+              max={200}
+              value={state.nightBonusPct}
+              onChange={(e) => setNightBonusPct(Number(e.target.value) || 0)}
+              className="w-28 rounded-full text-center"
+            />
           </div>
         </div>
       </GlassCard>
@@ -165,7 +264,15 @@ function Settings() {
   );
 }
 
-function Row({ icon: Icon, label, children }: { icon: typeof Bell; label: string; children: React.ReactNode }) {
+function Row({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof Bell;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">

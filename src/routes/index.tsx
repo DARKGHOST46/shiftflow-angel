@@ -5,9 +5,14 @@ import { QuickNotesWidget } from "@/components/quick-notes-widget";
 import { AnimatedStatCard } from "@/components/animated-stat-card";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate } from "@/lib/storage";
-import { getShiftDaysInMonth } from "@/lib/shift-engine";
+import {
+  getMonthlyHours,
+  getMonthlyNightCount,
+  getWorkDaysInMonth,
+} from "@/lib/shift-engine";
+import { getSystem } from "@/lib/shift-systems";
 import { getNextAlarm } from "@/lib/alarm";
-import { CalendarDays, Clock, Siren, AlarmClock } from "lucide-react";
+import { CalendarDays, Clock, Siren, AlarmClock, Moon } from "lucide-react";
 import { GlassCard } from "@/components/glass-card";
 
 export const Route = createFileRoute("/")({
@@ -28,12 +33,16 @@ function greeting(t: (k: "greetingMorning" | "greetingAfternoon" | "greetingEven
 function Home() {
   const { state, t } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
+  const system = getSystem(state.systemId);
   const now = new Date();
-  const shiftsThisMonth = anchor ? getShiftDaysInMonth(now.getFullYear(), now.getMonth(), anchor).length : 0;
-  const hours = shiftsThisMonth * 24;
+  const workDays = anchor ? getWorkDaysInMonth(now.getFullYear(), now.getMonth(), system, anchor) : [];
+  const hours = anchor ? getMonthlyHours(now.getFullYear(), now.getMonth(), system, anchor) : 0;
+  const nights = anchor ? getMonthlyNightCount(now.getFullYear(), now.getMonth(), system, anchor) : 0;
   const nextNurseId = state.evacuationQueues[state.evacuationDestination]?.[0];
   const nextNurse = state.nurses.find((n) => n.id === nextNurseId);
-  const nextAlarm = state.alarmEnabled ? getNextAlarm(anchor, state.alarmTime) : null;
+  const nextAlarm = state.alarmEnabled
+    ? getNextAlarm(anchor, state.alarmTime, state.systemId, state.alarmLeadMinutes)
+    : null;
 
   return (
     <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
@@ -50,8 +59,18 @@ function Home() {
       <ShiftStatusCard />
 
       <div className="grid grid-cols-2 gap-4">
-        <AnimatedStatCard icon={CalendarDays} label={t("shiftsThisMonth")} value={shiftsThisMonth} accent="shift" />
+        <AnimatedStatCard icon={CalendarDays} label={t("shiftsThisMonth")} value={workDays.length} accent="shift" />
         <AnimatedStatCard icon={Clock} label={t("estimatedHours")} value={`${hours}h`} accent="accent" />
+        <AnimatedStatCard icon={Moon} label={t("nightShifts")} value={nights} accent="rest" />
+        <AnimatedStatCard
+          icon={Clock}
+          label={t("salary")}
+          value={
+            state.hourlyRate > 0
+              ? `${Math.round(hours * state.hourlyRate + nights * state.hourlyRate * (state.nightBonusPct / 100) * 1)}`
+              : "—"
+          }
+        />
       </div>
 
       <GlassCard>
@@ -59,9 +78,7 @@ function Home() {
           <Siren className="size-4 text-primary" />
           <h3 className="font-semibold">{t("nextNurse")}</h3>
         </div>
-        <p className="text-2xl font-semibold text-gradient">
-          {nextNurse?.name ?? "—"}
-        </p>
+        <p className="text-2xl font-semibold text-gradient">{nextNurse?.name ?? "—"}</p>
       </GlassCard>
 
       <GlassCard>

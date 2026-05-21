@@ -1,99 +1,137 @@
-export type ShiftDayType = "shift" | "rest1" | "rest2" | "rest3" | "rest4";
+import { getSystem, type ShiftSlot, type ShiftSystem, type SystemId } from "@/lib/shift-systems";
 
-export const CYCLE_LENGTH = 5;
-export const SHIFT_START_HOUR = 8;
-export const SHIFT_START_MINUTE = 30;
-export const SHIFT_DURATION_HOURS = 24;
+export type { ShiftSlot, SystemId } from "@/lib/shift-systems";
 
 function toLocalMidnight(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
-
-function withShiftStartTime(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), SHIFT_START_HOUR, SHIFT_START_MINUTE, 0, 0);
-}
-
 function daysBetween(a: Date, b: Date): number {
-  const ms = toLocalMidnight(a).getTime() - toLocalMidnight(b).getTime();
-  return Math.round(ms / 86_400_000);
+  return Math.round((toLocalMidnight(a).getTime() - toLocalMidnight(b).getTime()) / 86_400_000);
 }
-
 function mod(n: number, m: number): number {
   return ((n % m) + m) % m;
 }
 
-/**
- * Calendar-day classification. A calendar day is a "shift" day when the 24h
- * shift block STARTS on that day (at SHIFT_START_HOUR:SHIFT_START_MINUTE).
- */
-export function getDayType(date: Date, anchorDate: Date): ShiftDayType {
-  const diff = daysBetween(date, anchorDate);
-  const idx = mod(diff, CYCLE_LENGTH);
-  return (["shift", "rest1", "rest2", "rest3", "rest4"] as const)[idx];
+export function getSlotForDate(date: Date, system: ShiftSystem, anchor: Date): ShiftSlot {
+  const idx = mod(daysBetween(date, anchor), system.cycleLength);
+  return system.pattern[idx];
 }
 
-export function getRestDayNumber(date: Date, anchorDate: Date): number | null {
-  const t = getDayType(date, anchorDate);
-  if (t === "shift") return null;
-  return Number(t.replace("rest", ""));
+export function getSlotStartOn(date: Date, slot: ShiftSlot): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    slot.startHour,
+    slot.startMinute,
+    0,
+    0,
+  );
 }
 
-export function isShiftDay(date: Date, anchorDate: Date): boolean {
-  return getDayType(date, anchorDate) === "shift";
+export interface ActiveSlot {
+  slot: ShiftSlot;
+  start: Date;
+  end: Date;
+  /** Day-cell date the slot was scheduled on. */
+  date: Date;
 }
 
-/** True when `now` falls inside an active 24h shift window. */
-export function isOnShift(now: Date, anchorDate: Date): boolean {
-  return getCurrentShiftStart(anchorDate, now) !== null;
-}
-
-/** Start of the currently active shift window, else null. */
-export function getCurrentShiftStart(anchorDate: Date, now: Date = new Date()): Date | null {
-  const today = toLocalMidnight(now);
-  if (isShiftDay(today, anchorDate)) {
-    const start = withShiftStartTime(today);
-    if (now.getTime() >= start.getTime()) return start;
-  }
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  if (isShiftDay(yesterday, anchorDate)) {
-    const start = withShiftStartTime(yesterday);
-    const end = new Date(start.getTime() + SHIFT_DURATION_HOURS * 3600_000);
-    if (now.getTime() < end.getTime()) return start;
+/** Returns the slot currently in progress (may have started yesterday for cross-midnight shifts). */
+export function getActiveSlot(
+  now: Date,
+  system: ShiftSystem,
+  anchor: Date,
+): ActiveSlot | null {
+  for (const offset of [0, -1]) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+    const slot = getSlotForDate(day, system, anchor);
+    if (slot.kind === "rest") continue;
+    const start = getSlotStartOn(day, slot);
+    const end = new Date(start.getTime() + slot.durationH * 3600_000);
+    if (now.getTime() >= start.getTime() && now.getTime() < end.getTime()) {
+      return { slot, start, end, date: day };
+    }
   }
   return null;
 }
 
-/** End of currently active shift (start + 24h), else null. */
-export function getCurrentShiftEnd(anchorDate: Date, now: Date = new Date()): Date | null {
-  const start = getCurrentShiftStart(anchorDate, now);
-  if (!start) return null;
-  return new Date(start.getTime() + SHIFT_DURATION_HOURS * 3600_000);
-}
-
-/** Start (08:30) of the next upcoming shift strictly after `from`. */
-export function getNextShiftStart(anchorDate: Date, from: Date = new Date()): Date {
-  const today = toLocalMidnight(from);
-  for (let i = 0; i <= CYCLE_LENGTH * 2; i++) {
-    const candidateDay = new Date(today);
-    candidateDay.setDate(today.getDate() + i);
-    if (!isShiftDay(candidateDay, anchorDate)) continue;
-    const start = withShiftStartTime(candidateDay);
-    if (start.getTime() > from.getTime()) return start;
+/** Next non-rest slot strictly after `now`. */
+export function getNextWorkSlot(
+  now: Date,
+  system: ShiftSystem,
+  anchor: Date,
+): ActiveSlot {
+  const today = toLocalMidnight(now);
+  for (let i = 0; i <= system.cycleLength * 2 + 2; i++) {
+    const day = new Date(today);
+    day.setDate(today.getDate() + i);
+    const slot = getSlotForDate(day, system, anchor);
+    if (slot.kind === "rest") continue;
+    const start = getSlotStartOn(day, slot);
+    if (start.getTime() > now.getTime()) {
+      const end = new Date(start.getTime() + slot.durationH * 3600_000);
+      return { slot, start, end, date: day };
+    }
   }
-  const fallback = new Date(today);
-  fallback.setDate(today.getDate() + CYCLE_LENGTH);
-  return withShiftStartTime(fallback);
+  // theoretical fallback
+  const day = new Date(today);
+  day.setDate(today.getDate() + system.cycleLength);
+  const slot = system.pattern[0];
+  const start = getSlotStartOn(day, slot);
+  return {
+    slot,
+    start,
+    end: new Date(start.getTime() + slot.durationH * 3600_000),
+    date: day,
+  };
 }
 
-export function getShiftDaysInMonth(year: number, month: number, anchorDate: Date): Date[] {
-  const days: Date[] = [];
+export function isWorkDay(date: Date, system: ShiftSystem, anchor: Date): boolean {
+  return getSlotForDate(date, system, anchor).kind !== "rest";
+}
+
+/** Backwards-compatible alias used by alarm logic — any non-rest day counts. */
+export function isShiftDay(date: Date, anchor: Date, systemId: SystemId = "24h_4rest"): boolean {
+  return isWorkDay(date, getSystem(systemId), anchor);
+}
+
+export function getWorkDaysInMonth(
+  year: number,
+  month: number,
+  system: ShiftSystem,
+  anchor: Date,
+): { date: Date; slot: ShiftSlot }[] {
+  const out: { date: Date; slot: ShiftSlot }[] = [];
   const last = new Date(year, month + 1, 0);
   for (let d = 1; d <= last.getDate(); d++) {
     const date = new Date(year, month, d);
-    if (isShiftDay(date, anchorDate)) days.push(date);
+    const slot = getSlotForDate(date, system, anchor);
+    if (slot.kind !== "rest") out.push({ date, slot });
   }
-  return days;
+  return out;
+}
+
+export function getMonthlyHours(
+  year: number,
+  month: number,
+  system: ShiftSystem,
+  anchor: Date,
+): number {
+  return getWorkDaysInMonth(year, month, system, anchor).reduce(
+    (s, d) => s + d.slot.durationH,
+    0,
+  );
+}
+
+export function getMonthlyNightCount(
+  year: number,
+  month: number,
+  system: ShiftSystem,
+  anchor: Date,
+): number {
+  return getWorkDaysInMonth(year, month, system, anchor).filter((d) => d.slot.kind === "night")
+    .length;
 }
 
 export function getMonthMatrix(year: number, month: number): Date[][] {

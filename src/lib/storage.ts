@@ -1,3 +1,5 @@
+import type { SystemId } from "@/lib/shift-systems";
+
 export type Language = "en" | "ar" | "fr";
 export type Theme = "light" | "dark";
 export type Destination = "oran" | "ain_temouchent";
@@ -24,29 +26,38 @@ export interface EvacuationLog {
 export interface AppState {
   onboarded: boolean;
   anchorDate: string | null;
+  systemId: SystemId;
   language: Language;
   theme: Theme;
   notifications: boolean;
   alarmEnabled: boolean;
   alarmTime: string;
+  /** Minutes before each shift to trigger the pre-shift reminder. */
+  alarmLeadMinutes: number;
   lastAlarmDate: string | null;
   notes: QuickNote[];
   nurses: Nurse[];
   evacuationQueues: Record<Destination, string[]>;
   evacuationHistory: EvacuationLog[];
   evacuationDestination: Destination;
+  /** Hourly rate (local currency) used for salary estimates. */
+  hourlyRate: number;
+  /** Bonus multiplier applied to night-shift hours. */
+  nightBonusPct: number;
 }
 
-const KEY = "shiftflow:state:v4";
+const KEY = "shiftflow:state:v5";
 
 export const defaultState: AppState = {
   onboarded: false,
   anchorDate: null,
+  systemId: "24h_4rest",
   language: "en",
   theme: "light",
   notifications: false,
   alarmEnabled: false,
   alarmTime: "07:00",
+  alarmLeadMinutes: 60,
   lastAlarmDate: null,
   notes: [],
   nurses: [
@@ -61,6 +72,8 @@ export const defaultState: AppState = {
   },
   evacuationHistory: [],
   evacuationDestination: "oran",
+  hourlyRate: 0,
+  nightBonusPct: 25,
 };
 
 export function loadState(): AppState {

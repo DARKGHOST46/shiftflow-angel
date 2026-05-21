@@ -1,14 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
-import { shouldFireAlarm } from "@/lib/alarm";
+import { shouldFireAlarmNow } from "@/lib/alarm";
 import { toast } from "sonner";
 
-/**
- * Polls every 15s. On shift days, when local time crosses the configured alarm time,
- * fires a browser notification (if permitted) + audible beep + toast, and records
- * lastAlarmDate so it does not re-fire the same day.
- */
 export function useAlarmScheduler() {
   const { state, setLastAlarmDate, t } = useApp();
   const firedRef = useRef<string | null>(state.lastAlarmDate);
@@ -26,13 +21,27 @@ export function useAlarmScheduler() {
       const now = new Date();
       const todayIso = toAnchorIso(now);
       if (firedRef.current === todayIso) return;
-      if (!shouldFireAlarm(anchor, state.alarmTime, firedRef.current, now)) return;
+      const trigger = shouldFireAlarmNow(
+        anchor,
+        state.alarmTime,
+        state.systemId,
+        state.alarmLeadMinutes,
+        firedRef.current,
+        now,
+      );
+      if (!trigger) return;
 
       firedRef.current = todayIso;
       setLastAlarmDate(todayIso);
 
       const title = t("appName");
-      const body = `${t("shiftAlarm")} • ${state.alarmTime}`;
+      const labelKey =
+        trigger.slot.kind === "night"
+          ? "nightShiftAlarm"
+          : trigger.slot.kind === "day"
+            ? "dayShiftAlarm"
+            : "shiftAlarm";
+      const body = `${t(labelKey)} • ${t(trigger.slot.labelKey)}`;
       try {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification(title, { body, tag: "shiftflow-alarm" });
@@ -51,7 +60,15 @@ export function useAlarmScheduler() {
     tick();
     const id = window.setInterval(tick, 15_000);
     return () => window.clearInterval(id);
-  }, [state.alarmEnabled, state.alarmTime, state.anchorDate, setLastAlarmDate, t]);
+  }, [
+    state.alarmEnabled,
+    state.alarmTime,
+    state.anchorDate,
+    state.systemId,
+    state.alarmLeadMinutes,
+    setLastAlarmDate,
+    t,
+  ]);
 }
 
 function playBeep() {
