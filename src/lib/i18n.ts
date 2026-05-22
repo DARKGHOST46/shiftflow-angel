@@ -104,6 +104,15 @@ const en: Dict = {
   sys12h: "12h / 12h",
   sys12hDesc: "12h day, then 12h night, then 2 days rest. Repeats.",
   cycleLength: "Cycle length",
+  fatigueIntel: "Fatigue Intelligence",
+  fatigueIntelSub: "Live workload & recovery analysis",
+  recoveryAdvised: "Recovery window detected — protect tomorrow",
+  highWorkload: "Workload above healthy threshold this week",
+  sleepRisk: "Sleep rhythm instability likely after night streaks",
+  optimalRecovery: "Optimal recovery window identified mid-cycle",
+  aiOptimized: "AI-optimized rotation",
+  liveOps: "Live operations",
+  commandCenter: "Command center",
 };
 
 const ar: Dict = {
