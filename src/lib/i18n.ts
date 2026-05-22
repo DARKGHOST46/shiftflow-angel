@@ -104,6 +104,15 @@ const en: Dict = {
   sys12h: "12h / 12h",
   sys12hDesc: "12h day, then 12h night, then 2 days rest. Repeats.",
   cycleLength: "Cycle length",
+  fatigueIntel: "Fatigue Intelligence",
+  fatigueIntelSub: "Live workload & recovery analysis",
+  recoveryAdvised: "Recovery window detected — protect tomorrow",
+  highWorkload: "Workload above healthy threshold this week",
+  sleepRisk: "Sleep rhythm instability likely after night streaks",
+  optimalRecovery: "Optimal recovery window identified mid-cycle",
+  aiOptimized: "AI-optimized rotation",
+  liveOps: "Live operations",
+  commandCenter: "Command center",
 };
 
 const ar: Dict = {
@@ -208,6 +217,15 @@ const ar: Dict = {
   sys12h: "12س / 12س",
   sys12hDesc: "12س نهار ثم 12س ليل ثم يومان راحة، وتتكرر.",
   cycleLength: "طول الدورة",
+  fatigueIntel: "ذكاء الإرهاق",
+  fatigueIntelSub: "تحليل مباشر للإجهاد والتعافي",
+  recoveryAdvised: "نافذة تعافٍ مكتشفة — احمِ غدك",
+  highWorkload: "حجم العمل يتجاوز الحد الصحي هذا الأسبوع",
+  sleepRisk: "احتمال اضطراب إيقاع النوم بعد الورديات الليلية",
+  optimalRecovery: "تم تحديد نافذة التعافي المثلى في منتصف الدورة",
+  aiOptimized: "تدوير مُحسَّن بالذكاء الاصطناعي",
+  liveOps: "العمليات المباشرة",
+  commandCenter: "مركز القيادة",
 };
 
 const fr: Dict = {
@@ -312,6 +330,15 @@ const fr: Dict = {
   sys12h: "12h / 12h",
   sys12hDesc: "12h jour, 12h nuit, puis 2 jours de repos. Se répète.",
   cycleLength: "Longueur du cycle",
+  fatigueIntel: "Intelligence Fatigue",
+  fatigueIntelSub: "Analyse en direct de la charge et de la récupération",
+  recoveryAdvised: "Fenêtre de récupération détectée — protégez demain",
+  highWorkload: "Charge au-dessus du seuil sain cette semaine",
+  sleepRisk: "Instabilité du rythme de sommeil probable après les nuits",
+  optimalRecovery: "Fenêtre de récupération optimale identifiée",
+  aiOptimized: "Rotation optimisée par IA",
+  liveOps: "Opérations en direct",
+  commandCenter: "Centre de commande",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };

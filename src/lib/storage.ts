@@ -53,7 +53,7 @@ export const defaultState: AppState = {
   anchorDate: null,
   systemId: "24h_4rest",
   language: "en",
-  theme: "light",
+  theme: "dark",
   notifications: false,
   alarmEnabled: false,
   alarmTime: "07:00",
