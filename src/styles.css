@@ -227,4 +227,53 @@
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-6px); }
   }
+
+  /* AI core breathing glow — used by Hakim Mouh idle state */
+  .ai-core {
+    background: radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--accent) 70%, transparent), color-mix(in oklab, var(--primary) 55%, transparent) 55%, transparent 80%);
+    filter: blur(1px);
+    animation: ai-core-pulse 3.6s ease-in-out infinite;
+  }
+  @keyframes ai-core-pulse {
+    0%, 100% { transform: scale(1);   opacity: 0.85; }
+    50%      { transform: scale(1.06); opacity: 1;    }
+  }
+
+  /* ECG line sweep */
+  .ecg-line {
+    stroke: var(--primary);
+    stroke-width: 1.5;
+    fill: none;
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--primary) 70%, transparent));
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: ecg-sweep 3.2s linear infinite;
+  }
+  @keyframes ecg-sweep {
+    0%   { stroke-dashoffset: 600; }
+    60%  { stroke-dashoffset: 0;   }
+    100% { stroke-dashoffset: -600; }
+  }
+
+  /* Particle drift used in Hakim canvas */
+  .drift { animation: drift 14s linear infinite; }
+  @keyframes drift {
+    0%   { transform: translate3d(0,0,0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    100% { transform: translate3d(40px,-120px,0); opacity: 0; }
+  }
+
+  /* Typing dot bounce */
+  .typing-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: var(--primary);
+    display: inline-block;
+    animation: typing-bounce 1.1s ease-in-out infinite;
+    box-shadow: 0 0 8px color-mix(in oklab, var(--primary) 60%, transparent);
+  }
+  @keyframes typing-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40%           { transform: translateY(-5px); opacity: 1; }
+  }
 }
+

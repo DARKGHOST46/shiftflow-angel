@@ -1,5 +1,6 @@
 import { useApp } from "@/lib/app-context";
 import { FloatingBottomNav } from "@/components/floating-bottom-nav";
+import { HakimFab } from "@/components/hakim-fab";
 import { OnboardingScreen } from "@/components/onboarding-screen";
 import { type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,6 +29,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </motion.div>
       </AnimatePresence>
+      <HakimFab />
       <FloatingBottomNav />
     </div>
   );
