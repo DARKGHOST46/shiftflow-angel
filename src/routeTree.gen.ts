@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as HakimRouteImport } from './routes/hakim'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HakimRoute = HakimRouteImport.update({
+  id: '/hakim',
+  path: '/hakim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvacuationRoute = EvacuationRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/hakim': typeof HakimRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/hakim': typeof HakimRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/hakim': typeof HakimRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/hakim'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/hakim'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/hakim'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
   EvacuationRoute: typeof EvacuationRoute
+  HakimRoute: typeof HakimRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   ApiHakimRoute: typeof ApiHakimRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hakim': {
+      id: '/hakim'
+      path: '/hakim'
+      fullPath: '/hakim'
+      preLoaderRoute: typeof HakimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evacuation': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
   EvacuationRoute: EvacuationRoute,
+  HakimRoute: HakimRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   ApiHakimRoute: ApiHakimRoute,
@@ -166,3 +187,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
