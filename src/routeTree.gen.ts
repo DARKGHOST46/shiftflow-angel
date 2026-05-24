@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -25,6 +26,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabTubesRoute = LabTubesRouteImport.update({
+  id: '/lab-tubes',
+  path: '/lab-tubes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HakimRoute = HakimRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
   '/hakim': typeof HakimRoute
+  '/lab-tubes': typeof LabTubesRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
   '/hakim': typeof HakimRoute
+  '/lab-tubes': typeof LabTubesRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
   '/hakim': typeof HakimRoute
+  '/lab-tubes': typeof LabTubesRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/evacuation'
     | '/hakim'
+    | '/lab-tubes'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/evacuation'
     | '/hakim'
+    | '/lab-tubes'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/evacuation'
     | '/hakim'
+    | '/lab-tubes'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   EvacuationRoute: typeof EvacuationRoute
   HakimRoute: typeof HakimRoute
+  LabTubesRoute: typeof LabTubesRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   ApiHakimRoute: typeof ApiHakimRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab-tubes': {
+      id: '/lab-tubes'
+      path: '/lab-tubes'
+      fullPath: '/lab-tubes'
+      preLoaderRoute: typeof LabTubesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hakim': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   EvacuationRoute: EvacuationRoute,
   HakimRoute: HakimRoute,
+  LabTubesRoute: LabTubesRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   ApiHakimRoute: ApiHakimRoute,

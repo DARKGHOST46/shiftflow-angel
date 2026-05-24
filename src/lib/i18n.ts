@@ -140,6 +140,20 @@ const en: Dict = {
   qpOxygen: "Oxygen delivery methods",
   qpInjection: "IM injection sites",
   qpTriage: "Triage priorities",
+  labTubes: "Lab Tubes",
+  labTubesTitle: "Lab Tube Reference",
+  labTubesSubtitle: "Rapid blood collection tube lookup",
+  labTubesSearch: "Search test, color, additive...",
+  labTubesRapid: "Rapid Lookup",
+  labTubesAll: "All Tubes",
+  labTubesAdditive: "Additive",
+  labTubesTests: "Common Tests",
+  labTubesSample: "Sample",
+  labTubesNotes: "Handling",
+  labTubesWarnings: "Precautions",
+  labTubesNoResults: "No tube matches your query",
+  labTubesOpen: "Open Lab Tube Reference",
+  toolkit: "Nurse Survival Toolkit",
 };
 
 const ar: Dict = {
