@@ -150,6 +150,24 @@ function Home() {
         </p>
       </GlassCard>
 
+      <Link to="/lab-tubes" className="block">
+        <GlassCard className="hover:scale-[1.01] transition-transform cursor-pointer">
+          <div className="flex items-center gap-3">
+            <div className="size-12 rounded-2xl bg-primary/15 border border-primary/30 grid place-items-center glow">
+              <FlaskConical className="size-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {t("toolkit")}
+              </div>
+              <div className="font-semibold text-gradient">{t("labTubesTitle")}</div>
+              <div className="text-xs text-muted-foreground truncate">{t("labTubesSubtitle")}</div>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </div>
+        </GlassCard>
+      </Link>
+
       <QuickNotesWidget />
     </div>
   );
