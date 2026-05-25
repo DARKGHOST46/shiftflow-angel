@@ -160,3 +160,19 @@ export function formatCountdown(ms: number): { d: number; h: number; m: number; 
     s: total % 60,
   };
 }
+
+export function getConsecutiveNights(
+  now: Date,
+  system: ShiftSystem,
+  anchor: Date,
+): number {
+  let consecutiveNights = 0;
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const slot = getSlotForDate(d, system, anchor);
+    if (slot.kind === "night") consecutiveNights++;
+    else if (i > 0 && consecutiveNights > 0) break;
+  }
+  return consecutiveNights;
+}

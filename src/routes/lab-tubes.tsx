@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, FlaskConical, AlertTriangle, ChevronDown, Beaker, Droplets, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/lab-tubes")({
   component: () => (
@@ -188,7 +189,7 @@ function TubeCard({
   lang: "en" | "ar" | "fr";
   open: boolean;
   onToggle: () => void;
-  t: (k: never) => string;
+  t: (k: TKey) => string;
 }) {
   return (
     <motion.div
@@ -240,12 +241,12 @@ function TubeCard({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 space-y-3 border-t border-border/30 pt-3">
-              <DetailRow icon={Beaker} label={t("labTubesAdditive" as never)} value={tube.additive} />
-              <DetailRow icon={Droplets} label={t("labTubesSample" as never)} value={tube.sample} />
+              <DetailRow icon={Beaker} label={t("labTubesAdditive")} value={tube.additive} />
+              <DetailRow icon={Droplets} label={t("labTubesSample")} value={tube.sample} />
 
               <div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                  {t("labTubesTests" as never)}
+                  {t("labTubesTests")}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {tube.tests.map((test) => (
@@ -261,7 +262,7 @@ function TubeCard({
 
               <div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                  {t("labTubesNotes" as never)}
+                  {t("labTubesNotes")}
                 </div>
                 <p className="text-sm">{tube.notes}</p>
                 {tube.inversions != null && tube.inversions > 0 && (
@@ -272,7 +273,7 @@ function TubeCard({
               <div className="rounded-xl bg-destructive/10 border border-destructive/30 p-3 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-destructive text-[10px] uppercase tracking-widest font-semibold">
                   <AlertTriangle className="size-3" />
-                  {t("labTubesWarnings" as never)}
+                  {t("labTubesWarnings")}
                 </div>
                 {tube.warnings.map((w) => (
                   <p key={w} className="text-xs text-foreground/90">• {w}</p>

@@ -10,6 +10,7 @@ import {
   getMonthlyNightCount,
   getSlotForDate,
   getWorkDaysInMonth,
+  getConsecutiveNights,
 } from "@/lib/shift-engine";
 import { getSystem } from "@/lib/shift-systems";
 import { getNextAlarm } from "@/lib/alarm";
@@ -44,16 +45,7 @@ function Home() {
   const nights = anchor ? getMonthlyNightCount(now.getFullYear(), now.getMonth(), system, anchor) : 0;
 
   // Consecutive night streak ending today (or most recent run)
-  let consecutiveNights = 0;
-  if (anchor) {
-    for (let i = 0; i < 14; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const slot = getSlotForDate(d, system, anchor);
-      if (slot.kind === "night") consecutiveNights++;
-      else if (i > 0 && consecutiveNights > 0) break;
-    }
-  }
+  const consecutiveNights = anchor ? getConsecutiveNights(now, system, anchor) : 0;
   const fatigue = computeFatigue(hours, nights, consecutiveNights);
 
   const insights: string[] = [];
