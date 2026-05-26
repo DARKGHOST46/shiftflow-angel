@@ -131,7 +131,11 @@ function HakimPage() {
       abortRef.current = controller;
 
       try {
-        const resp = await fetch("/api/hakim", {
+        const isTauri = typeof window !== "undefined" && ("__TAURI_INTERNALS__" in window || "__TAURI_METADATA__" in window);
+        const endpoint = isTauri 
+          ? "https://13d278e7-0c2e-4846-9f24-4b2afa16fa30.lovable.app/api/hakim" 
+          : "/api/hakim";
+        const resp = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: next, shiftContext }),
