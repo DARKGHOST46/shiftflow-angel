@@ -27,8 +27,15 @@ function generate() {
   console.log(`✨ Found Client Styles: assets/${cssFile}`);
 
   // Create the static fallback index template.
-  // Because TanStack Start hydrates directly onto the document, we provide a clean,
-  // minimal html shell that the client-side router can mount over.
+  // TanStack Start's default client entry calls hydrateRoot(document, <StartClient/>).
+  // StartClient internally calls hydrateStart() which reads window.$_TSR for dehydrated
+  // router state. Without this data, hydrate() throws an invariant error and React never
+  // mounts — producing the blank-screen bug.
+  //
+  // The fix: inject a minimal window.$_TSR seed that satisfies the hydration bootstrap.
+  // We provide only the root route match ("__root__") with no lastMatchId, which causes
+  // the router to detect "SPA mode" (lastMatchId !== last match id) and trigger a full
+  // client-side router.load() — exactly the behavior we need for the static desktop shell.
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -38,6 +45,31 @@ function generate() {
     <link rel="stylesheet" href="/assets/${cssFile}" />
   </head>
   <body>
+    <script>
+      // TanStack Start SSR bootstrap seed for static desktop shell.
+      // This provides the minimal dehydrated state so the client entry's
+      // hydrateRoot() + StartClient hydration path succeeds and enters
+      // SPA fallback mode (full client-side routing).
+      window.$_TSR = {
+        router: {
+          manifest: undefined,
+          dehydratedData: undefined,
+          // Omit lastMatchId so the router detects SPA mode
+          matches: [
+            {
+              i: "__root__",
+              s: "success",
+              u: Date.now(),
+            },
+          ],
+        },
+        h: function() {},
+        e: function() {},
+        c: function() {},
+        p: function(s) { s(); },
+        buffer: [],
+      };
+    </script>
     <script type="module" src="/assets/${jsFile}"></script>
   </body>
 </html>
