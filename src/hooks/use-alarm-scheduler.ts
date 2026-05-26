@@ -31,8 +31,8 @@ export function useAlarmScheduler() {
       );
       if (!trigger) return;
 
-      firedRef.current = todayIso;
-      setLastAlarmDate(todayIso);
+      firedRef.current = trigger.id;
+      setLastAlarmDate(trigger.id);
 
       const title = t("appName");
       const labelKey =

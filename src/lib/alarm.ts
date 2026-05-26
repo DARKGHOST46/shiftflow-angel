@@ -47,6 +47,7 @@ export function getNextAlarm(
 export interface AlarmTrigger {
   fire: Date;
   slot: ShiftSlot;
+  id: string;
 }
 
 /** Returns the alarm trigger (and slot it belongs to) if it should fire right now. */
@@ -81,8 +82,12 @@ export function shouldFireAlarmNow(
       fire = new Date(c.start.getTime() - leadMinutes * 60_000);
     }
     if (toAnchorIso(fire) !== todayIso) continue;
+
+    const triggerId = `${todayIso}:${c.slot.kind}`;
+    if (lastAlarmDate === triggerId) continue;
+
     const diff = (now.getTime() - fire.getTime()) / 1000;
-    if (diff >= 0 && diff <= windowSec) return { fire, slot: c.slot };
+    if (diff >= 0 && diff <= windowSec) return { fire, slot: c.slot, id: triggerId };
   }
   return null;
 }
