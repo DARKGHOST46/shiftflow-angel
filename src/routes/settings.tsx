@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { LANGUAGES } from "@/lib/i18n";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
 import { SYSTEM_LIST } from "@/lib/shift-systems";
+import { isNativeNotificationsSupported, triggerTestAlarm } from "@/lib/native-notifications";
 import {
   Moon,
   Sun,
@@ -19,11 +20,16 @@ import {
   AlarmClock,
   Layers,
   Banknote,
+  ShieldCheck,
+  MonitorSmartphone,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getNextAlarm } from "@/lib/alarm";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/settings")({
   component: () => (
@@ -53,9 +59,18 @@ function Settings() {
     ? getNextAlarm(anchor, state.alarmTime, state.systemId, state.alarmLeadMinutes)
     : null;
 
+  const [permStatus, setPermStatus] = useState<string>("default");
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      setPermStatus(Notification.permission);
+    }
+  }, []);
+
   const toggleNotifications = async (v: boolean) => {
     if (v && "Notification" in window) {
       const perm = await Notification.requestPermission();
+      setPermStatus(perm);
       if (perm !== "granted") {
         toast.error("Permission denied");
         return;
@@ -65,8 +80,36 @@ function Settings() {
     setNotifications(v);
   };
 
+  const handleTestAlarm = async () => {
+    const success = await triggerTestAlarm(t("appName"), t("shiftAlarm") + " (Test)");
+    if (success) {
+      toast.success("Test alarm triggered");
+      // Fallback beep play if window is in focus
+      try {
+        const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (AC) {
+          const ctx = new AC();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.3);
+        }
+      } catch {}
+    } else {
+      toast.error("Failed to trigger test alarm. Check permissions.");
+    }
+  };
+
+  const isDesktop = isNativeNotificationsSupported();
+
   return (
-    <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5">
+    <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5 pb-24">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("settings")}</h1>
       </header>
@@ -157,9 +200,46 @@ function Settings() {
       </GlassCard>
 
       <GlassCard>
-        <Row icon={Bell} label={t("notifications")}>
-          <Switch checked={state.notifications} onCheckedChange={toggleNotifications} />
-        </Row>
+        <div className="space-y-5">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="size-5 text-primary" />
+            <h2 className="font-semibold tracking-tight">Alarm Reliability</h2>
+          </div>
+          
+          <Row icon={Bell} label="Notifications Allowed">
+            <Switch checked={state.notifications} onCheckedChange={toggleNotifications} />
+          </Row>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-secondary/30 p-3 flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">Platform</span>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <MonitorSmartphone className="size-4 opacity-70" />
+                {isDesktop ? "Tauri Desktop" : "Web Browser"}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-secondary/30 p-3 flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">Permission</span>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                {permStatus === "granted" ? (
+                  <CheckCircle2 className="size-4 text-green-500" />
+                ) : (
+                  <XCircle className="size-4 text-red-400" />
+                )}
+                {permStatus}
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            variant="outline" 
+            className="w-full rounded-2xl h-12"
+            onClick={handleTestAlarm}
+          >
+            <Bell className="size-4 mr-2" />
+            Test Alarm Notification
+          </Button>
+        </div>
       </GlassCard>
 
       <GlassCard>

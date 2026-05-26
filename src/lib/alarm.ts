@@ -91,3 +91,50 @@ export function shouldFireAlarmNow(
   }
   return null;
 }
+
+/**
+ * Identifies the exact next future alarm trigger for native ahead-of-time scheduling.
+ * Needed for Tauri background notification registration when the WebView suspends.
+ */
+export function getUpcomingAlarmTrigger(
+  anchorDate: Date | null,
+  alarmTime: string,
+  systemId: SystemId,
+  leadMinutes: number,
+  from: Date = new Date(),
+): AlarmTrigger | null {
+  if (!anchorDate) return null;
+  const system = getSystem(systemId);
+
+  // Look ahead up to 15 days to find the next valid shift alarm
+  for (let i = 0; i < 15; i++) {
+    const day = new Date(from.getFullYear(), from.getMonth(), from.getDate() + i);
+    const dayIso = toAnchorIso(day);
+
+    const candidates: { start: Date; slot: ShiftSlot }[] = [];
+    const active = getActiveSlot(day, system, anchorDate);
+    if (active) candidates.push({ start: active.start, slot: active.slot });
+    const next = getNextWorkSlot(day, system, anchorDate);
+    candidates.push({ start: next.start, slot: next.slot });
+
+    for (const c of candidates) {
+      let fire: Date;
+      if (system.id === "24h_4rest") {
+        const [h, m] = parseTime(alarmTime);
+        fire = new Date(c.start.getFullYear(), c.start.getMonth(), c.start.getDate(), h, m, 0, 0);
+      } else {
+        fire = new Date(c.start.getTime() - leadMinutes * 60_000);
+      }
+
+      if (toAnchorIso(fire) !== dayIso) continue;
+
+      const triggerId = `${dayIso}:${c.slot.kind}`;
+
+      // If this fire time is strictly in the future, return it
+      if (fire.getTime() > from.getTime()) {
+        return { fire, slot: c.slot, id: triggerId };
+      }
+    }
+  }
+  return null;
+}
