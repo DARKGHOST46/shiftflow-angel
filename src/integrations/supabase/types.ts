@@ -14,13 +14,149 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      evacuation_entries: {
+        Row: {
+          created_at: string
+          id: string
+          last_edited_at: string
+          last_edited_by_name: string | null
+          list_id: string
+          nurse_name: string
+          owner_id: string
+          place: string | null
+          turn_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_edited_at?: string
+          last_edited_by_name?: string | null
+          list_id: string
+          nurse_name: string
+          owner_id: string
+          place?: string | null
+          turn_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_edited_at?: string
+          last_edited_by_name?: string | null
+          list_id?: string
+          nurse_name?: string
+          owner_id?: string
+          place?: string | null
+          turn_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evacuation_entries_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "evacuation_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evacuation_lists: {
+        Row: {
+          created_at: string
+          destination: string | null
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketplace_listings: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          price_dzd: number
+          seller_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          price_dzd?: number
+          seller_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          price_dzd?: number
+          seller_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
