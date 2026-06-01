@@ -154,6 +154,15 @@ const en: Dict = {
   labTubesNoResults: "No tube matches your query",
   labTubesOpen: "Open Lab Tube Reference",
   toolkit: "Nurse Survival Toolkit",
+  loginSubtitle: "Sign in to sync your shifts and access the marketplace",
+  loginWithGoogle: "Sign in with Google",
+  loginSigningIn: "Signing in…",
+  loginError: "Sign-in failed. Please try again.",
+  loginPrivacy: "By signing in you agree to use this app for personal shift planning only.",
+  welcomeUser: "Welcome",
+  signOut: "Sign out",
+  marketplace: "Marketplace",
+  comingSoon: "Coming soon",
 };
 
 const ar: Dict = {
@@ -294,6 +303,15 @@ const ar: Dict = {
   qpOxygen: "طرق إعطاء الأكسجين",
   qpInjection: "مواقع الحقن العضلي",
   qpTriage: "أولويات الفرز",
+  loginSubtitle: "سجّل الدخول لمزامنة ورديّاتك والوصول إلى السوق",
+  loginWithGoogle: "تسجيل الدخول بحساب جوجل",
+  loginSigningIn: "جارٍ تسجيل الدخول…",
+  loginError: "فشل تسجيل الدخول. حاول مجدداً.",
+  loginPrivacy: "بتسجيل الدخول فإنك توافق على استخدام هذا التطبيق لتخطيط ورديّاتك الشخصية فقط.",
+  welcomeUser: "مرحباً",
+  signOut: "تسجيل الخروج",
+  marketplace: "السوق",
+  comingSoon: "قريباً",
 };
 
 const fr: Dict = {
@@ -434,6 +452,15 @@ const fr: Dict = {
   qpOxygen: "Modes d'oxygénothérapie",
   qpInjection: "Sites d'injection IM",
   qpTriage: "Priorités de triage",
+  loginSubtitle: "Connectez-vous pour synchroniser vos gardes et accéder au marché",
+  loginWithGoogle: "Se connecter avec Google",
+  loginSigningIn: "Connexion…",
+  loginError: "Échec de la connexion. Réessayez.",
+  loginPrivacy: "En vous connectant, vous acceptez d'utiliser cette app pour votre planification personnelle uniquement.",
+  welcomeUser: "Bienvenue",
+  signOut: "Se déconnecter",
+  marketplace: "Marché",
+  comingSoon: "Bientôt disponible",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };

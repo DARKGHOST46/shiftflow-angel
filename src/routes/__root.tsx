@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { AppProvider } from "@/lib/app-context";
+import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -50,10 +51,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <Outlet />
-        <Toaster position="top-center" />
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <Outlet />
+          <Toaster position="top-center" />
+        </AppProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
