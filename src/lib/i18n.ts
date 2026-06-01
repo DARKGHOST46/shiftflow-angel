@@ -154,6 +154,15 @@ const en: Dict = {
   labTubesNoResults: "No tube matches your query",
   labTubesOpen: "Open Lab Tube Reference",
   toolkit: "Nurse Survival Toolkit",
+  loginSubtitle: "Sign in to sync your shifts and access the marketplace",
+  loginWithGoogle: "Sign in with Google",
+  loginSigningIn: "Signing in…",
+  loginError: "Sign-in failed. Please try again.",
+  loginPrivacy: "By signing in you agree to use this app for personal shift planning only.",
+  welcomeUser: "Welcome",
+  signOut: "Sign out",
+  marketplace: "Marketplace",
+  comingSoon: "Coming soon",
 };
 
 const ar: Dict = {
