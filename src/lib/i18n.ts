@@ -452,6 +452,15 @@ const fr: Dict = {
   qpOxygen: "Modes d'oxygénothérapie",
   qpInjection: "Sites d'injection IM",
   qpTriage: "Priorités de triage",
+  loginSubtitle: "Connectez-vous pour synchroniser vos gardes et accéder au marché",
+  loginWithGoogle: "Se connecter avec Google",
+  loginSigningIn: "Connexion…",
+  loginError: "Échec de la connexion. Réessayez.",
+  loginPrivacy: "En vous connectant, vous acceptez d'utiliser cette app pour votre planification personnelle uniquement.",
+  welcomeUser: "Bienvenue",
+  signOut: "Se déconnecter",
+  marketplace: "Marché",
+  comingSoon: "Bientôt disponible",
 };
 
 const DICTS: Record<Language, Dict> = { en, ar, fr };
