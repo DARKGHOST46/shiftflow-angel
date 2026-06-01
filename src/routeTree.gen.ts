@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
@@ -27,6 +28,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/api/hakim': typeof ApiHakimRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/settings'
     | '/statistics'
     | '/api/hakim'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   ApiHakimRoute: typeof ApiHakimRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  MarketplaceRoute: MarketplaceRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   ApiHakimRoute: ApiHakimRoute,
@@ -229,3 +250,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

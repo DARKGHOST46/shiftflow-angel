@@ -5,7 +5,15 @@ import { useApp } from "@/lib/app-context";
 import { LAB_TUBES, RAPID_LOOKUP, type LabTube } from "@/lib/lab-tubes";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, FlaskConical, AlertTriangle, ChevronDown, Beaker, Droplets, Zap } from "lucide-react";
+import {
+  Search,
+  FlaskConical,
+  AlertTriangle,
+  ChevronDown,
+  Beaker,
+  Droplets,
+  Zap,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TKey } from "@/lib/i18n";
 
@@ -24,19 +32,31 @@ function LabTubesPage() {
 
   const q = query.trim().toLowerCase();
 
+  const lang = state.language as "en" | "ar" | "fr";
+
   const filteredTubes = useMemo(() => {
     if (!q) return LAB_TUBES;
     return LAB_TUBES.filter((tube) => {
       const hay = [
         tube.id,
-        tube.additive,
-        tube.sample,
-        tube.notes,
+        tube.additive.en,
+        tube.additive.ar,
+        tube.additive.fr,
+        tube.sample.en,
+        tube.sample.ar,
+        tube.sample.fr,
+        tube.notes.en,
+        tube.notes.ar,
+        tube.notes.fr,
         tube.colorName.en,
         tube.colorName.ar,
         tube.colorName.fr,
-        ...tube.tests,
-        ...tube.warnings,
+        ...tube.tests.en,
+        ...tube.tests.ar,
+        ...tube.tests.fr,
+        ...tube.warnings.en,
+        ...tube.warnings.ar,
+        ...tube.warnings.fr,
       ]
         .join(" ")
         .toLowerCase();
@@ -46,10 +66,13 @@ function LabTubesPage() {
 
   const matchedRapid = useMemo(() => {
     if (!q) return RAPID_LOOKUP.slice(0, 6);
-    return RAPID_LOOKUP.filter((r) => r.test.toLowerCase().includes(q)).slice(0, 8);
+    return RAPID_LOOKUP.filter((r) =>
+      [r.test.en, r.test.ar, r.test.fr, r.hint.en, r.hint.ar, r.hint.fr]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    ).slice(0, 8);
   }, [q]);
-
-  const lang = state.language as "en" | "ar" | "fr";
 
   return (
     <div className="max-w-2xl mx-auto px-5 pt-10 space-y-5 relative z-10">
@@ -80,7 +103,7 @@ function LabTubesPage() {
               onClick={() => setQuery("")}
               className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
             >
-              clear
+              {t("clear")}
             </button>
           )}
         </div>
@@ -95,7 +118,7 @@ function LabTubesPage() {
         <div className="grid grid-cols-2 gap-2">
           {matchedRapid.map((r) => (
             <motion.div
-              key={r.test}
+              key={r.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               className="relative flex items-center gap-2 rounded-xl bg-background/40 border border-border/40 px-3 py-2"
@@ -104,14 +127,12 @@ function LabTubesPage() {
                 {r.tubeIds.map((id) => {
                   const tube = LAB_TUBES.find((t) => t.id === id);
                   if (!tube) return null;
-                  return (
-                    <TubeIndicator key={id} swatch={tube.swatch} glow={tube.glow} size="sm" />
-                  );
+                  return <TubeIndicator key={id} swatch={tube.swatch} glow={tube.glow} size="sm" />;
                 })}
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-semibold truncate">{r.test}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{r.hint}</div>
+                <div className="text-sm font-semibold truncate">{r.test[lang]}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{r.hint[lang]}</div>
               </div>
             </motion.div>
           ))}
@@ -128,7 +149,9 @@ function LabTubesPage() {
         <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           {t("labTubesAll")}
         </h3>
-        <span className="text-[10px] text-muted-foreground">{filteredTubes.length} / {LAB_TUBES.length}</span>
+        <span className="text-[10px] text-muted-foreground">
+          {filteredTubes.length} / {LAB_TUBES.length}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -198,9 +221,14 @@ function TubeCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       className="glass rounded-3xl overflow-hidden border border-border/40"
-      style={{ boxShadow: `0 0 0 1px rgba(${tube.glow}, 0.18), 0 12px 32px -16px rgba(${tube.glow}, 0.4)` }}
+      style={{
+        boxShadow: `0 0 0 1px rgba(${tube.glow}, 0.18), 0 12px 32px -16px rgba(${tube.glow}, 0.4)`,
+      }}
     >
-      <button onClick={onToggle} className="w-full text-left p-4 flex items-center gap-4 cursor-pointer">
+      <button
+        onClick={onToggle}
+        className="w-full text-left p-4 flex items-center gap-4 cursor-pointer"
+      >
         <TubeIndicator swatch={tube.swatch} glow={tube.glow} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -211,9 +239,9 @@ function TubeCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate">{tube.additive}</p>
+          <p className="text-xs text-muted-foreground truncate">{tube.additive[lang]}</p>
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {tube.tests.slice(0, 3).map((test) => (
+            {tube.tests[lang].slice(0, 3).map((test) => (
               <span
                 key={test}
                 className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
@@ -221,8 +249,10 @@ function TubeCard({
                 {test}
               </span>
             ))}
-            {tube.tests.length > 3 && (
-              <span className="text-[10px] text-muted-foreground">+{tube.tests.length - 3}</span>
+            {tube.tests[lang].length > 3 && (
+              <span className="text-[10px] text-muted-foreground">
+                +{tube.tests[lang].length - 3}
+              </span>
             )}
           </div>
         </div>
@@ -241,15 +271,15 @@ function TubeCard({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 space-y-3 border-t border-border/30 pt-3">
-              <DetailRow icon={Beaker} label={t("labTubesAdditive")} value={tube.additive} />
-              <DetailRow icon={Droplets} label={t("labTubesSample")} value={tube.sample} />
+              <DetailRow icon={Beaker} label={t("labTubesAdditive")} value={tube.additive[lang]} />
+              <DetailRow icon={Droplets} label={t("labTubesSample")} value={tube.sample[lang]} />
 
               <div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
                   {t("labTubesTests")}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {tube.tests.map((test) => (
+                  {tube.tests[lang].map((test) => (
                     <span
                       key={test}
                       className="text-xs px-2.5 py-1 rounded-full bg-background/60 border border-border/40"
@@ -264,9 +294,11 @@ function TubeCard({
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
                   {t("labTubesNotes")}
                 </div>
-                <p className="text-sm">{tube.notes}</p>
+                <p className="text-sm">{tube.notes[lang]}</p>
                 {tube.inversions != null && tube.inversions > 0 && (
-                  <p className="text-xs text-primary mt-1">↻ Invert {tube.inversions}×</p>
+                  <p className="text-xs text-primary mt-1">
+                    ↻ {t("labTubesInvert")} {tube.inversions}×
+                  </p>
                 )}
               </div>
 
@@ -275,8 +307,10 @@ function TubeCard({
                   <AlertTriangle className="size-3" />
                   {t("labTubesWarnings")}
                 </div>
-                {tube.warnings.map((w) => (
-                  <p key={w} className="text-xs text-foreground/90">• {w}</p>
+                {tube.warnings[lang].map((w) => (
+                  <p key={w} className="text-xs text-foreground/90">
+                    • {w}
+                  </p>
                 ))}
               </div>
             </div>
