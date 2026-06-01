@@ -303,6 +303,15 @@ const ar: Dict = {
   qpOxygen: "طرق إعطاء الأكسجين",
   qpInjection: "مواقع الحقن العضلي",
   qpTriage: "أولويات الفرز",
+  loginSubtitle: "سجّل الدخول لمزامنة ورديّاتك والوصول إلى السوق",
+  loginWithGoogle: "تسجيل الدخول بحساب جوجل",
+  loginSigningIn: "جارٍ تسجيل الدخول…",
+  loginError: "فشل تسجيل الدخول. حاول مجدداً.",
+  loginPrivacy: "بتسجيل الدخول فإنك توافق على استخدام هذا التطبيق لتخطيط ورديّاتك الشخصية فقط.",
+  welcomeUser: "مرحباً",
+  signOut: "تسجيل الخروج",
+  marketplace: "السوق",
+  comingSoon: "قريباً",
 };
 
 const fr: Dict = {
