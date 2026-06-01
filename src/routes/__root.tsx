@@ -9,12 +9,16 @@ import appCss from "../styles.css?url";
 import { AppProvider } from "@/lib/app-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/sonner";
+import { GlobalErrorBoundary } from "@/components/error-boundary";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "mobile-web-app-capable", content: "yes" },
       { title: "ShiftFlow Nurse — 24h Shift Scheduler" },
       { name: "description", content: "Premium nurse scheduler for the 24h shift + 4 rest day rotation." },
       { name: "theme-color", content: "#0f0f1a" },
@@ -22,13 +26,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "ShiftFlow Nurse — 24h Shift Scheduler" },
       { property: "og:description", content: "Premium nurse scheduler for the 24h shift + 4 rest day rotation." },
       { name: "twitter:description", content: "Premium nurse scheduler for the 24h shift + 4 rest day rotation." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b69cde9c-13fc-4960-a3ed-c481eb8de036/id-preview-3882361b--13d278e7-0c2e-4846-9f24-4b2afa16fa30.lovable.app-1779058516724.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b69cde9c-13fc-4960-a3ed-c481eb8de036/id-preview-3882361b--13d278e7-0c2e-4846-9f24-4b2afa16fa30.lovable.app-1779058516724.png" },
+      { property: "og:image", content: "https://shiftflow.online/icon.svg" },
+      { name: "twitter:image", content: "https://shiftflow.online/icon.svg" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://shiftflow.online" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: "https://shiftflow.online" }
+    ],
   }),
+  errorComponent: GlobalErrorBoundary,
   shellComponent: RootShell,
   component: RootComponent,
 });

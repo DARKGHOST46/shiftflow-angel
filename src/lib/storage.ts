@@ -44,6 +44,7 @@ export interface AppState {
   hourlyRate: number;
   /** Bonus multiplier applied to night-shift hours. */
   nightBonusPct: number;
+  exhaustionMode: boolean;
 }
 
 const KEY = "shiftflow:state:v5";
@@ -74,6 +75,7 @@ export const defaultState: AppState = {
   evacuationDestination: "oran",
   hourlyRate: 0,
   nightBonusPct: 25,
+  exhaustionMode: false,
 };
 
 export function loadState(): AppState {
@@ -81,8 +83,23 @@ export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState;
-    const parsed = JSON.parse(raw) as Partial<AppState>;
-    return { ...defaultState, ...parsed };
+    const parsed = JSON.parse(raw);
+    
+    // Safety check against corrupted local storage primitives/arrays
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      console.warn("[ShiftFlow] Corrupted state detected. Falling back to default.");
+      return defaultState;
+    }
+
+    // Ensure critical arrays and nested objects exist even if partially corrupted
+    return { 
+      ...defaultState, 
+      ...parsed,
+      notes: Array.isArray(parsed.notes) ? parsed.notes : defaultState.notes,
+      nurses: Array.isArray(parsed.nurses) ? parsed.nurses : defaultState.nurses,
+      evacuationHistory: Array.isArray(parsed.evacuationHistory) ? parsed.evacuationHistory : defaultState.evacuationHistory,
+      evacuationQueues: (parsed.evacuationQueues && typeof parsed.evacuationQueues === "object") ? parsed.evacuationQueues : defaultState.evacuationQueues,
+    };
   } catch {
     return defaultState;
   }

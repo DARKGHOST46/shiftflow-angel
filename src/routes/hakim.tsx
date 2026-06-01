@@ -1,5 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { getApiUrl } from "@/lib/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useOnline } from "@/hooks/use-online";
+import { useVoiceRecognition } from "@/hooks/use-voice-recognition";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -20,6 +24,9 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { GlassCard } from "@/components/glass-card";
+import { EmergencyQuickActions } from "@/components/emergency-quick-actions";
+import { EmergencyOfflineReferences } from "@/components/emergency-offline-references";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { useApp } from "@/lib/app-context";
 import { parseAnchorDate } from "@/lib/storage";
 import {
@@ -49,27 +56,11 @@ const THINKING_PHRASES_KEY = [
   "hakimThinkingOps",
 ] as const;
 
-type QuickPrompt = {
-  icon: typeof Stethoscope;
-  labelKey: "qpIvDrip" | "qpCpr" | "qpNgTube" | "qpHypo" | "qpPotassium" | "qpNightRecovery" | "qpBurnout" | "qpOxygen" | "qpInjection" | "qpTriage";
-  prompt: string;
-};
 
-const QUICK_PROMPTS: QuickPrompt[] = [
-  { icon: Calculator, labelKey: "qpIvDrip", prompt: "Walk me through IV drip rate calculation with a worked example (gtts/min from mL and hours)." },
-  { icon: HeartPulse, labelKey: "qpCpr", prompt: "Give me the adult CPR sequence step by step, including compression depth, rate and ratio." },
-  { icon: Syringe, labelKey: "qpNgTube", prompt: "List the steps for safe NG tube insertion in an adult, including placement verification." },
-  { icon: Droplets, labelKey: "qpHypo", prompt: "What are the early signs of hypoglycemia and the immediate nursing actions?" },
-  { icon: Activity, labelKey: "qpPotassium", prompt: "What is the normal serum potassium range and what should I watch for outside it?" },
-  { icon: Moon, labelKey: "qpNightRecovery", prompt: "Best evidence-based recovery routine after a streak of night shifts." },
-  { icon: Brain, labelKey: "qpBurnout", prompt: "Practical burnout prevention strategies for nurses doing rotating shifts." },
-  { icon: ScanLine, labelKey: "qpOxygen", prompt: "Compare common oxygen delivery methods and approximate FiO2 ranges." },
-  { icon: Pill, labelKey: "qpInjection", prompt: "Recommended IM injection sites for adults with landmark and needle guidance." },
-  { icon: ShieldAlert, labelKey: "qpTriage", prompt: "Explain ESI-style triage priorities with a quick decision pattern." },
-];
 
 function HakimPage() {
-  const { state, t } = useApp();
+  const { state, t, setExhaustionMode } = useApp();
+  const isOnline = useOnline();
   const anchor = parseAnchorDate(state.anchorDate);
   const system = getSystem(state.systemId);
   const now = new Date();
@@ -104,6 +95,23 @@ function HakimPage() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  const {
+    isSupported: voiceSupported,
+    isListening: voiceListening,
+    transcript: voiceTranscript,
+    error: voiceError,
+    start: voiceStart,
+    stop: voiceStop,
+    resetTranscript: voiceReset,
+  } = useVoiceRecognition(state.language);
+
+  // Sync voice transcript to input
+  useEffect(() => {
+    if (voiceListening && voiceTranscript) {
+      setInput(voiceTranscript);
+    }
+  }, [voiceListening, voiceTranscript]);
+
   useEffect(() => {
     if (!streaming) return;
     const id = window.setInterval(() => {
@@ -126,15 +134,20 @@ function HakimPage() {
       setMessages(next);
       setInput("");
       setStreaming(true);
+      voiceReset();
 
       const controller = new AbortController();
       abortRef.current = controller;
 
       try {
-        const isTauri = typeof window !== "undefined" && ("__TAURI_INTERNALS__" in window || "__TAURI_METADATA__" in window);
-        const endpoint = isTauri 
-          ? "https://13d278e7-0c2e-4846-9f24-4b2afa16fa30.lovable.app/api/hakim" 
-          : "/api/hakim";
+        const endpoint = getApiUrl();
+        
+        if (!endpoint) {
+          setError(t("hakimEndpointMissing"));
+          setStreaming(false);
+          return;
+        }
+
         const resp = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -145,7 +158,22 @@ function HakimPage() {
         if (!resp.ok || !resp.body) {
           if (resp.status === 429) setError(t("hakimRateLimited"));
           else if (resp.status === 402) setError(t("hakimPaymentRequired"));
-          else setError(t("hakimGenericError"));
+          else {
+            try {
+              const errData = await resp.clone().json();
+              setError(`Error: ${errData.error || resp.statusText}`);
+            } catch {
+              if (resp.status === 401 || resp.status === 403) {
+                setError(t("hakimAuthFailure"));
+              } else if (resp.status === 404) {
+                setError("Endpoint not found (404).");
+              } else if (resp.status >= 500) {
+                setError(t("hakimServerError"));
+              } else {
+                setError(`Error: HTTP ${resp.status} - API unreachable`);
+              }
+            }
+          }
           setStreaming(false);
           return;
         }
@@ -196,7 +224,12 @@ function HakimPage() {
       } catch (e) {
         if ((e as Error).name !== "AbortError") {
           console.error(e);
-          setError(t("hakimGenericError"));
+          const errMsg = (e as Error).message;
+          if (errMsg.includes("Failed to fetch") || errMsg.includes("Network Error")) {
+            setError(t("hakimBackendUnreachable"));
+          } else {
+            setError(`Network Error: ${errMsg}`);
+          }
         }
       } finally {
         setStreaming(false);
@@ -278,7 +311,14 @@ function HakimPage() {
 
         {/* Empty state OR conversation */}
         {messages.length === 0 ? (
-          <EmptyState onPick={(p) => send(p)} t={t} />
+          <EmptyState 
+            onPick={(p) => {
+              setExhaustionMode(true);
+              send(p);
+            }} 
+            t={t} 
+            isOnline={isOnline} 
+          />
         ) : (
           <div ref={scrollRef} className="space-y-3 max-h-[55vh] overflow-y-auto no-scrollbar pr-1">
             {messages.map((m, i) => (
@@ -300,22 +340,54 @@ function HakimPage() {
         <form onSubmit={onSubmit} className="glass-strong rounded-full pl-2 pr-1 py-1.5 flex items-center gap-2 shadow-2xl">
           <button
             type="button"
+            onClick={() => {
+              if (voiceListening) {
+                voiceStop();
+                if (input.trim() && isOnline) {
+                  send(input);
+                }
+              } else {
+                if (voiceSupported) voiceStart();
+              }
+            }}
+            disabled={!voiceSupported && !voiceError}
             aria-label={t("hakimVoice")}
-            className="grid place-items-center size-10 rounded-full hover:bg-white/5 text-muted-foreground transition"
-            title={t("hakimVoiceComing")}
+            className={cn(
+              "grid place-items-center size-10 rounded-full transition relative",
+              voiceListening
+                ? "bg-destructive text-destructive-foreground"
+                : "hover:bg-white/5 text-muted-foreground"
+            )}
+            title={
+              voiceError === "denied"
+                ? t("voiceDenied")
+                : !voiceSupported
+                ? t("voiceUnsupported")
+                : t("hakimVoice")
+            }
           >
-            <Mic className="size-5" />
+            {voiceListening && <span className="absolute inset-0 rounded-full border border-destructive animate-ping" />}
+            <Mic className={cn("size-5 relative z-10", voiceListening && "animate-pulse")} />
           </button>
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={t("hakimPlaceholder")}
+            onChange={(e) => {
+              if (voiceListening) voiceStop();
+              setInput(e.target.value);
+            }}
+            placeholder={
+              !isOnline && voiceListening 
+                ? t("voiceOffline") 
+                : voiceListening 
+                  ? t("voiceListening") 
+                  : t("hakimPlaceholder")
+            }
             className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground/70 py-2"
             disabled={streaming}
           />
           <button
             type="submit"
-            disabled={streaming || !input.trim()}
+            disabled={streaming || !input.trim() || !isOnline}
             aria-label={t("hakimSend")}
             className={cn(
               "grid place-items-center size-10 rounded-full text-primary-foreground transition relative overflow-hidden",
@@ -392,13 +464,33 @@ function ThinkingRow({ phraseKey, t }: { phraseKey: typeof THINKING_PHRASES_KEY[
 function EmptyState({
   onPick,
   t,
+  isOnline,
 }: {
   onPick: (prompt: string) => void;
   t: ReturnType<typeof useApp>["t"];
+  isOnline: boolean;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
+      {/* Offline Banner */}
+      {!isOnline && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="rounded-2xl border-2 border-destructive/50 bg-destructive/10 p-4"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <ShieldAlert className="size-5 text-destructive" />
+            <h3 className="font-bold text-destructive">{t("offlineBannerTitle")}</h3>
+          </div>
+          <p className="text-sm font-medium text-destructive/90 leading-relaxed">
+            {t("offlineBannerDesc")}
+          </p>
+        </motion.div>
+      )}
+
       {/* Idle AI core */}
+      {isOnline && (
       <div className="relative grid place-items-center py-6">
         <div className="relative size-28">
           <span className="absolute inset-0 rounded-full ai-core" />
@@ -412,34 +504,23 @@ function EmptyState({
           {t("hakimIntro")}
         </p>
       </div>
+      )}
 
       <div>
-        <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-          <Stethoscope className="size-3" />
-          {t("hakimSuggestions")}
+        <div className="flex items-center gap-2 mb-3 text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+          <Activity className="size-4" />
+          {t("toolkit")}
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {QUICK_PROMPTS.map((qp, i) => {
-            const Icon = qp.icon;
-            return (
-              <motion.button
-                key={qp.labelKey}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.04 * i, duration: 0.3 }}
-                onClick={() => onPick(qp.prompt)}
-                className="group relative text-left rounded-2xl glass p-3 hover:ring-glow transition overflow-hidden"
-              >
-                <span className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition" />
-                <Icon className="size-4 text-primary mb-1.5" />
-                <div className="text-xs font-medium leading-tight">
-                  {t(qp.labelKey)}
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
+        <EmergencyQuickActions onPick={onPick} isOnline={isOnline} />
       </div>
+
+      {!isOnline && (
+        <div className="mt-8">
+          <EmergencyOfflineReferences />
+        </div>
+      )}
+
+      <MedicalDisclaimer />
     </div>
   );
 }

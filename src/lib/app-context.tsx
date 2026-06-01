@@ -32,6 +32,7 @@ type Ctx = {
   setEvacuationDestination: (d: Destination) => void;
   moveNurse: (id: string, direction: -1 | 1) => void;
   completeEvacuationTurn: () => void;
+  setExhaustionMode: (v: boolean) => void;
 };
 
 const AppCtx = createContext<Ctx | null>(null);
@@ -50,9 +51,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", state.theme === "dark");
+    root.classList.toggle("exhaustion-mode", state.exhaustionMode);
     root.setAttribute("dir", isRTL(state.language) ? "rtl" : "ltr");
     root.setAttribute("lang", state.language);
-  }, [state.theme, state.language]);
+  }, [state.theme, state.language, state.exhaustionMode]);
 
   const value = useMemo<Ctx>(
     () => ({
@@ -71,6 +73,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLastAlarmDate: (lastAlarmDate) => setState((p) => ({ ...p, lastAlarmDate })),
       setHourlyRate: (hourlyRate) => setState((p) => ({ ...p, hourlyRate })),
       setNightBonusPct: (nightBonusPct) => setState((p) => ({ ...p, nightBonusPct })),
+      setExhaustionMode: (exhaustionMode) => setState((p) => ({ ...p, exhaustionMode })),
       addNote: (text) =>
         setState((p) => {
           const note: QuickNote = { id: crypto.randomUUID(), text, createdAt: Date.now() };

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { useApp } from "@/lib/app-context";
 import { GlassCard } from "@/components/glass-card";
@@ -6,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
+import { FeedbackModal } from "@/components/feedback-modal";
 import { LANGUAGES } from "@/lib/i18n";
 import { parseAnchorDate, toAnchorIso } from "@/lib/storage";
 import { SYSTEM_LIST } from "@/lib/shift-systems";
@@ -24,12 +27,17 @@ import {
   MonitorSmartphone,
   CheckCircle2,
   XCircle,
+  Eye,
+  MessageSquare,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getNextAlarm } from "@/lib/alarm";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { getApiUrl, checkBackendHealth } from "@/lib/api";
 
 export const Route = createFileRoute("/settings")({
   component: () => (
@@ -37,8 +45,21 @@ export const Route = createFileRoute("/settings")({
       <Settings />
     </AppLayout>
   ),
+  errorComponent: ({ error }) => (
+    <div className="max-w-2xl mx-auto px-5 pt-10 space-y-4">
+      <h1 className="text-xl font-bold text-destructive">Settings Error</h1>
+      <p className="text-sm text-muted-foreground">
+        {error instanceof Error ? error.message : "Unknown error"}
+      </p>
+      {import.meta.env.DEV && error instanceof Error && (
+        <pre className="text-xs bg-muted p-3 rounded-xl overflow-auto">{error.stack}</pre>
+      )}
+      <Link to="/" className="inline-block text-sm text-primary underline">
+        Return Home
+      </Link>
+    </div>
+  ),
 });
-
 function Settings() {
   const {
     state,
@@ -52,6 +73,7 @@ function Settings() {
     setAlarmLeadMinutes,
     setHourlyRate,
     setNightBonusPct,
+    setExhaustionMode,
     t,
   } = useApp();
   const anchor = parseAnchorDate(state.anchorDate);
@@ -60,6 +82,7 @@ function Settings() {
     : null;
 
   const [permStatus, setPermStatus] = useState<string>("default");
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
     if ("Notification" in window) {
@@ -156,6 +179,20 @@ function Settings() {
             ))}
           </div>
         </Row>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="space-y-4">
+          <Row icon={Eye} label="Exhaustion Mode">
+            <Switch
+              checked={state.exhaustionMode}
+              onCheckedChange={(v) => setExhaustionMode(v)}
+            />
+          </Row>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            High contrast layout for night shifts. Disables glassmorphism, increases border visibility, and reduces glare.
+          </p>
+        </div>
       </GlassCard>
 
       <GlassCard>
@@ -330,16 +367,35 @@ function Settings() {
       </GlassCard>
 
       <GlassCard>
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center">
-            <Info className="size-4" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+              <Info className="size-4" />
+            </div>
+            <div>
+              <p className="font-semibold">{t("about")}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t("aboutText")}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold">{t("about")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("aboutText")}</p>
-          </div>
+          <Button variant="outline" size="sm" onClick={() => setIsFeedbackOpen(true)} className="rounded-full shrink-0 text-xs font-semibold">
+            Feedback
+          </Button>
         </div>
       </GlassCard>
+
+      <SystemDiagnosticsCard t={t} />
+
+      <MedicalDisclaimer />
+
+      <div className="text-center text-xs text-muted-foreground/50 py-4 font-mono flex items-center justify-center gap-3">
+        <span>v{import.meta.env.VITE_APP_VERSION || "1.0.0"}</span>
+        <span>•</span>
+        <Link to="/privacy" className="hover:text-primary transition underline underline-offset-4">Privacy</Link>
+        <span>•</span>
+        <Link to="/terms" className="hover:text-primary transition underline underline-offset-4">Terms</Link>
+      </div>
+
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </div>
   );
 }
@@ -363,5 +419,61 @@ function Row({
       </div>
       {children}
     </div>
+  );
+}
+
+function SystemDiagnosticsCard({ t }: { t: ReturnType<typeof useApp>["t"] }) {
+  const [health, setHealth] = useState<{ reachable: boolean; status: number | null; url: string | null } | null>(null);
+  
+  useEffect(() => {
+    checkBackendHealth().then(setHealth);
+  }, []);
+
+  return (
+    <GlassCard>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <MonitorSmartphone className="size-5 text-primary" />
+          <h2 className="font-semibold tracking-tight">{t("sysDiagnostics") || "System Diagnostics"}</h2>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-secondary/30 p-3 flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-widest">{t("backendUrl") || "Backend URL"}</span>
+            <div className="flex items-center gap-2 text-sm font-medium break-all">
+              {health?.url || <span className="text-destructive">{t("unconfigured") || "Unconfigured"}</span>}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-secondary/30 p-3 flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">{t("backendReachable") || "Backend Reachable"}</span>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                {!health ? (
+                  <span className="animate-pulse">...</span>
+                ) : health.reachable ? (
+                  <><CheckCircle2 className="size-4 text-green-500" /> Yes ({health.status})</>
+                ) : (
+                  <><XCircle className="size-4 text-destructive" /> No</>
+                )}
+              </div>
+            </div>
+            
+            <div className="rounded-2xl bg-secondary/30 p-3 flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-widest">{t("aiServiceStatus") || "AI Service"}</span>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                {!health ? (
+                  <span className="animate-pulse">...</span>
+                ) : health.reachable ? (
+                  <><Sparkles className="size-4 text-primary" /> Online</>
+                ) : (
+                  <><AlertTriangle className="size-4 text-destructive" /> Offline</>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
   );
 }

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
+import { LandingPage } from "@/components/landing-page";
 import { ShiftStatusCard } from "@/components/shift-status-card";
 import { QuickNotesWidget } from "@/components/quick-notes-widget";
 import { AnimatedStatCard } from "@/components/animated-stat-card";
@@ -37,6 +38,11 @@ function greeting(t: (k: "greetingMorning" | "greetingAfternoon" | "greetingEven
 
 function Home() {
   const { state, t } = useApp();
+  
+  if (!state.onboarded) {
+    return <LandingPage />;
+  }
+
   const anchor = parseAnchorDate(state.anchorDate);
   const system = getSystem(state.systemId);
   const now = new Date();

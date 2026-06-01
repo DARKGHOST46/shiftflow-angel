@@ -44,13 +44,26 @@ TONE
 export const Route = createFileRoute("/api/hakim")({
   server: {
     handlers: {
+      OPTIONS: async () => {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          },
+        });
+      },
       POST: async ({ request }) => {
+        const corsHeaders = {
+          "Access-Control-Allow-Origin": "*",
+        };
         try {
-          const apiKey = process.env.LOVABLE_API_KEY;
+          const apiKey = process.env.GEMINI_API_KEY;
           if (!apiKey) {
             return new Response(
-              JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
-              { status: 500, headers: { "Content-Type": "application/json" } },
+              JSON.stringify({ error: "GEMINI_API_KEY is not configured" }),
+              { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
             );
           }
 
@@ -62,7 +75,7 @@ export const Route = createFileRoute("/api/hakim")({
           if (!Array.isArray(messages) || messages.length === 0) {
             return new Response(JSON.stringify({ error: "messages required" }), {
               status: 400,
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", ...corsHeaders },
             });
           }
 
@@ -77,7 +90,7 @@ export const Route = createFileRoute("/api/hakim")({
           }
 
           const upstream = await fetch(
-            "https://ai.gateway.lovable.dev/v1/chat/completions",
+            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
             {
               method: "POST",
               headers: {
@@ -85,7 +98,7 @@ export const Route = createFileRoute("/api/hakim")({
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                model: "google/gemini-3-flash-preview",
+                model: "gemini-2.5-flash",
                 stream: true,
                 messages: [...systemMessages, ...messages.slice(-20)],
               }),
@@ -96,20 +109,20 @@ export const Route = createFileRoute("/api/hakim")({
             if (upstream.status === 429) {
               return new Response(
                 JSON.stringify({ error: "rate_limited" }),
-                { status: 429, headers: { "Content-Type": "application/json" } },
+                { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } },
               );
             }
             if (upstream.status === 402) {
               return new Response(
                 JSON.stringify({ error: "payment_required" }),
-                { status: 402, headers: { "Content-Type": "application/json" } },
+                { status: 402, headers: { "Content-Type": "application/json", ...corsHeaders } },
               );
             }
             const text = await upstream.text();
             console.error("AI gateway error", upstream.status, text);
             return new Response(JSON.stringify({ error: "ai_upstream_error" }), {
               status: 500,
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", ...corsHeaders },
             });
           }
 
@@ -117,13 +130,14 @@ export const Route = createFileRoute("/api/hakim")({
             headers: {
               "Content-Type": "text/event-stream",
               "Cache-Control": "no-cache",
+              ...corsHeaders,
             },
           });
         } catch (e) {
           console.error("hakim route error", e);
           return new Response(
             JSON.stringify({ error: e instanceof Error ? e.message : "unknown" }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
+            { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
           );
         }
       },

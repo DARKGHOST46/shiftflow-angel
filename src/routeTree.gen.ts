@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
@@ -19,6 +21,11 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatisticsRoute = StatisticsRouteImport.update({
   id: '/statistics',
   path: '/statistics',
@@ -27,6 +34,11 @@ const StatisticsRoute = StatisticsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -72,8 +84,10 @@ export interface FileRoutesByFullPath {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
+  '/terms': typeof TermsRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesByTo {
@@ -83,8 +97,10 @@ export interface FileRoutesByTo {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
+  '/terms': typeof TermsRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesById {
@@ -95,8 +111,10 @@ export interface FileRoutesById {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
+  '/terms': typeof TermsRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRouteTypes {
@@ -108,8 +126,10 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/privacy'
     | '/settings'
     | '/statistics'
+    | '/terms'
     | '/api/hakim'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,8 +139,10 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/privacy'
     | '/settings'
     | '/statistics'
+    | '/terms'
     | '/api/hakim'
   id:
     | '__root__'
@@ -130,8 +152,10 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/privacy'
     | '/settings'
     | '/statistics'
+    | '/terms'
     | '/api/hakim'
   fileRoutesById: FileRoutesById
 }
@@ -142,13 +166,22 @@ export interface RootRouteChildren {
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
+  TermsRoute: typeof TermsRoute
   ApiHakimRoute: typeof ApiHakimRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/statistics': {
       id: '/statistics'
       path: '/statistics'
@@ -161,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -222,10 +262,22 @@ const rootRouteChildren: RootRouteChildren = {
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
+  TermsRoute: TermsRoute,
   ApiHakimRoute: ApiHakimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
