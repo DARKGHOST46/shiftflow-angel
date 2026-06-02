@@ -108,8 +108,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
-  '/api/hakim': typeof ApiHakimRoute
   '/api/fermli': typeof ApiFermliRoute
+  '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,8 +124,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
-  '/api/hakim': typeof ApiHakimRoute
   '/api/fermli': typeof ApiFermliRoute
+  '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,8 +141,8 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
-  '/api/hakim': typeof ApiHakimRoute
   '/api/fermli': typeof ApiFermliRoute
+  '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,8 +159,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
-    | '/api/hakim'
     | '/api/fermli'
+    | '/api/hakim'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,8 +175,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
-    | '/api/hakim'
     | '/api/fermli'
+    | '/api/hakim'
   id:
     | '__root__'
     | '/'
@@ -191,8 +191,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
-    | '/api/hakim'
     | '/api/fermli'
+    | '/api/hakim'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,8 +208,8 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   TermsRoute: typeof TermsRoute
-  ApiHakimRoute: typeof ApiHakimRoute
   ApiFermliRoute: typeof ApiFermliRoute
+  ApiHakimRoute: typeof ApiHakimRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -328,19 +328,9 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   TermsRoute: TermsRoute,
-  ApiHakimRoute: ApiHakimRoute,
   ApiFermliRoute: ApiFermliRoute,
+  ApiHakimRoute: ApiHakimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
