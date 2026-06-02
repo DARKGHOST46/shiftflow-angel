@@ -42,16 +42,15 @@ export const telemetry = {
    * Captures an explicit application exception.
    */
   captureException: (error: Error, context?: Record<string, unknown>) => {
-    logger.error(`Exception captured: ${error.message}`, "Telemetry", context);
-    // Stub: Sentry.captureException(error, { extra: context })
+    logger.error(`Exception captured: ${error.message}`, error, "Telemetry");
+    void context;
   },
 
   /**
    * Sends structured event data (e.g., "Feedback Submitted", "Alarm Triggered").
    */
   captureEvent: (event: TelemetryEvent) => {
-    logger.info(`Event: [${event.category}] ${event.action}`, "Telemetry", { label: event.label, value: event.value });
-    // Stub: PostHog.capture(event.action, { category: event.category, ... })
+    logger.info(`Event: [${event.category}] ${event.action} ${event.label ?? ""} ${event.value ?? ""}`.trim(), "Telemetry");
   },
 
   /**

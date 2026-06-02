@@ -15,7 +15,7 @@ import {
 } from "@/lib/shift-engine";
 import { getSystem } from "@/lib/shift-systems";
 import { getNextAlarm } from "@/lib/alarm";
-import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight } from "lucide-react";
+import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight, Stethoscope, Store } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GlassCard } from "@/components/glass-card";
 import { FatigueIntelligence, computeFatigue } from "@/components/fatigue-intelligence";
@@ -166,7 +166,49 @@ function Home() {
         </GlassCard>
       </Link>
 
+      <Link to="/fermli" className="block">
+        <GlassCard className="hover:scale-[1.01] transition-transform cursor-pointer relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute -top-10 -right-10 h-32 w-32 rounded-full blur-3xl opacity-50"
+            style={{ background: "radial-gradient(circle, oklch(0.65 0.22 20) 0%, transparent 70%)" }}
+          />
+          <div className="flex items-center gap-3 relative">
+            <div className="size-12 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 grid place-items-center shadow-lg shadow-rose-500/30">
+              <Stethoscope className="size-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {t("fermliEyebrow")}
+              </div>
+              <div className="font-semibold text-gradient">{t("fermliTitle")}</div>
+              <div className="text-xs text-muted-foreground truncate">{t("fermliSubtitle")}</div>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </div>
+        </GlassCard>
+      </Link>
+
+      <Link to="/marketplace" className="block">
+        <GlassCard className="hover:scale-[1.01] transition-transform cursor-pointer">
+          <div className="flex items-center gap-3">
+            <div className="size-12 rounded-2xl bg-primary/15 border border-primary/30 grid place-items-center glow">
+              <Store className="size-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {t("mkEyebrow")}
+              </div>
+              <div className="font-semibold text-gradient">{t("marketplace")}</div>
+              <div className="text-xs text-muted-foreground truncate">{t("mkSubtitle")}</div>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </div>
+        </GlassCard>
+      </Link>
+
       <QuickNotesWidget />
+
     </div>
   );
 }

@@ -13,13 +13,16 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
+import { Route as FermliRouteImport } from './routes/fermli'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
+import { Route as ApiFermliRouteImport } from './routes/api/fermli'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -41,6 +44,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -54,6 +62,11 @@ const LabTubesRoute = LabTubesRouteImport.update({
 const HakimRoute = HakimRouteImport.update({
   id: '/hakim',
   path: '/hakim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FermliRoute = FermliRouteImport.update({
+  id: '/fermli',
+  path: '/fermli',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvacuationRoute = EvacuationRouteImport.update({
@@ -76,31 +89,42 @@ const ApiHakimRoute = ApiHakimRouteImport.update({
   path: '/api/hakim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFermliRoute = ApiFermliRouteImport.update({
+  id: '/api/fermli',
+  path: '/api/fermli',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRoutesById {
@@ -108,13 +132,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/evacuation': typeof EvacuationRoute
+  '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
 }
 export interface FileRouteTypes {
@@ -123,39 +150,48 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/privacy'
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/api/fermli'
     | '/api/hakim'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/privacy'
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/api/fermli'
     | '/api/hakim'
   id:
     | '__root__'
     | '/'
     | '/calendar'
     | '/evacuation'
+    | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/marketplace'
     | '/privacy'
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/api/fermli'
     | '/api/hakim'
   fileRoutesById: FileRoutesById
 }
@@ -163,13 +199,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
   EvacuationRoute: typeof EvacuationRoute
+  FermliRoute: typeof FermliRoute
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   TermsRoute: typeof TermsRoute
+  ApiFermliRoute: typeof ApiFermliRoute
   ApiHakimRoute: typeof ApiHakimRoute
 }
 
@@ -203,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -222,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/hakim'
       fullPath: '/hakim'
       preLoaderRoute: typeof HakimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fermli': {
+      id: '/fermli'
+      path: '/fermli'
+      fullPath: '/fermli'
+      preLoaderRoute: typeof FermliRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evacuation': {
@@ -252,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHakimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/fermli': {
+      id: '/api/fermli'
+      path: '/api/fermli'
+      fullPath: '/api/fermli'
+      preLoaderRoute: typeof ApiFermliRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -259,25 +319,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
   EvacuationRoute: EvacuationRoute,
+  FermliRoute: FermliRoute,
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  MarketplaceRoute: MarketplaceRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   TermsRoute: TermsRoute,
+  ApiFermliRoute: ApiFermliRoute,
   ApiHakimRoute: ApiHakimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
