@@ -15,7 +15,7 @@ import {
 } from "@/lib/shift-engine";
 import { getSystem } from "@/lib/shift-systems";
 import { getNextAlarm } from "@/lib/alarm";
-import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight } from "lucide-react";
+import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight, Stethoscope, Store } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GlassCard } from "@/components/glass-card";
 import { FatigueIntelligence, computeFatigue } from "@/components/fatigue-intelligence";
