@@ -14,6 +14,7 @@ import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
@@ -49,6 +50,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -363,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
@@ -376,3 +397,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
