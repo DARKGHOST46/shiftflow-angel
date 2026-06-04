@@ -15,7 +15,7 @@ import {
 } from "@/lib/shift-engine";
 import { getSystem } from "@/lib/shift-systems";
 import { getNextAlarm } from "@/lib/alarm";
-import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight, Stethoscope, Store } from "lucide-react";
+import { CalendarDays, Clock, Siren, AlarmClock, Moon, Sparkles, FlaskConical, ChevronRight, Stethoscope, Store, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GlassCard } from "@/components/glass-card";
 import { FatigueIntelligence, computeFatigue } from "@/components/fatigue-intelligence";
@@ -201,6 +201,31 @@ function Home() {
               </div>
               <div className="font-semibold text-gradient">{t("marketplace")}</div>
               <div className="text-xs text-muted-foreground truncate">{t("mkSubtitle")}</div>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </div>
+        </GlassCard>
+      </Link>
+
+      <Link to="/map" className="block">
+        <GlassCard className="hover:scale-[1.01] transition-transform cursor-pointer relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full blur-3xl opacity-40"
+            style={{ background: "radial-gradient(circle, oklch(0.65 0.18 220) 0%, transparent 70%)" }}
+          />
+          <div className="flex items-center gap-3 relative">
+            <div className="size-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 grid place-items-center shadow-lg shadow-blue-500/30">
+              <MapPin className="size-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Algeria · Live map
+              </div>
+              <div className="font-semibold text-gradient">Hospital Locator</div>
+              <div className="text-xs text-muted-foreground truncate">
+                Nearest hospitals & live driving routes
+              </div>
             </div>
             <ChevronRight className="size-4 text-muted-foreground" />
           </div>

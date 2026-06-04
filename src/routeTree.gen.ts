@@ -14,6 +14,7 @@ import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
@@ -21,6 +22,8 @@ import { Route as FermliRouteImport } from './routes/fermli'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiRouteToRouteImport } from './routes/api/route-to'
+import { Route as ApiHospitalsRouteImport } from './routes/api/hospitals'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
 import { Route as ApiFermliRouteImport } from './routes/api/fermli'
 
@@ -47,6 +50,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -84,6 +92,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRouteToRoute = ApiRouteToRouteImport.update({
+  id: '/api/route-to',
+  path: '/api/route-to',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHospitalsRoute = ApiHospitalsRouteImport.update({
+  id: '/api/hospitals',
+  path: '/api/hospitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHakimRoute = ApiHakimRouteImport.update({
   id: '/api/hakim',
   path: '/api/hakim',
@@ -103,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -110,6 +129,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/api/hospitals': typeof ApiHospitalsRoute
+  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -119,6 +140,7 @@ export interface FileRoutesByTo {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -126,6 +148,8 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/api/hospitals': typeof ApiHospitalsRoute
+  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,6 +160,7 @@ export interface FileRoutesById {
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
@@ -143,6 +168,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/api/hospitals': typeof ApiHospitalsRoute
+  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -154,6 +181,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -161,6 +189,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
+    | '/api/hospitals'
+    | '/api/route-to'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -170,6 +200,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -177,6 +208,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
+    | '/api/hospitals'
+    | '/api/route-to'
   id:
     | '__root__'
     | '/'
@@ -186,6 +219,7 @@ export interface FileRouteTypes {
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/map'
     | '/marketplace'
     | '/privacy'
     | '/settings'
@@ -193,6 +227,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
+    | '/api/hospitals'
+    | '/api/route-to'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,6 +239,7 @@ export interface RootRouteChildren {
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
@@ -210,6 +247,8 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ApiFermliRoute: typeof ApiFermliRoute
   ApiHakimRoute: typeof ApiHakimRoute
+  ApiHospitalsRoute: typeof ApiHospitalsRoute
+  ApiRouteToRoute: typeof ApiRouteToRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -247,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -298,6 +344,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/route-to': {
+      id: '/api/route-to'
+      path: '/api/route-to'
+      fullPath: '/api/route-to'
+      preLoaderRoute: typeof ApiRouteToRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hospitals': {
+      id: '/api/hospitals'
+      path: '/api/hospitals'
+      fullPath: '/api/hospitals'
+      preLoaderRoute: typeof ApiHospitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hakim': {
       id: '/api/hakim'
       path: '/api/hakim'
@@ -323,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
@@ -330,17 +391,9 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ApiFermliRoute: ApiFermliRoute,
   ApiHakimRoute: ApiHakimRoute,
+  ApiHospitalsRoute: ApiHospitalsRoute,
+  ApiRouteToRoute: ApiRouteToRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
