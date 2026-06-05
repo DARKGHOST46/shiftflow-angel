@@ -2,11 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { GlassCard } from "@/components/glass-card";
 import { useApp } from "@/lib/app-context";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Phone, ExternalLink, Loader2, LocateFixed, Hospital, AlertTriangle } from "lucide-react";
+import { MapPin, Phone, ExternalLink, Loader2, LocateFixed, Hospital, AlertTriangle, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from "react-leaflet";
+import L from "leaflet";
 
 export const Route = createFileRoute("/map")({
   component: () => (
@@ -16,25 +19,11 @@ export const Route = createFileRoute("/map")({
   ),
 });
 
-type Hospital = {
-  id: string;
-  name: string;
-  address: string;
-  lat: number;
-  lng: number;
-  type: string;
-  rating: number | null;
-  phone: string | null;
-  mapsUri: string | null;
-  status: string | null;
+type DBHospital = {
+  id: string; name: string; name_ar: string | null; wilaya_code: number; wilaya_name: string;
+  city: string; type: string; lat: number; lng: number; phone: string | null; address: string | null;
 };
-
-declare global {
-  interface Window {
-    google: any;
-    __initShiftflowMap?: () => void;
-  }
-}
+type RowH = DBHospital & { _km: number };
 
 const ALGIERS = { lat: 36.7538, lng: 3.0588 };
 
@@ -42,334 +31,112 @@ function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: num
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLng = ((b.lng - a.lng) * Math.PI) / 180;
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a.lat * Math.PI) / 180) *
-      Math.cos((b.lat * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(s));
 }
+const fmtDistance = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`);
+const fmtDrive = (km: number) => `~${Math.round((km / 50) * 60)} min`;
 
-function fmtDistance(km: number) {
-  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+const TYPES = ["all", "chu", "eph", "ehs", "epsp"] as const;
+
+function makeIcon(color: string, size = 30) {
+  return L.divIcon({
+    className: "",
+    html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);display:grid;place-items:center"><div style="transform:rotate(45deg);color:white;font-size:14px">✚</div></div>`,
+    iconSize: [size, size], iconAnchor: [size / 2, size],
+  });
 }
 
-function fmtDuration(s: number) {
-  const m = Math.round(s / 60);
-  if (m < 60) return `${m} min`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m`;
+function FitTo({ points }: { points: [number, number][] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length === 0) return;
+    if (points.length === 1) { map.setView(points[0], 11); return; }
+    map.fitBounds(points, { padding: [60, 60] });
+  }, [points, map]);
+  return null;
 }
 
 function MapPage() {
   const { state } = useApp();
   const isRtl = state.language === "ar";
-  const mapEl = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const userMarkerRef = useRef<any>(null);
-  const userCircleRef = useRef<any>(null);
-  const hospitalMarkersRef = useRef<any[]>([]);
-  const routeLineRef = useRef<any>(null);
-
-  const [mapsReady, setMapsReady] = useState(false);
   const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
   const [locError, setLocError] = useState<string | null>(null);
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [hospitals, setHospitals] = useState<DBHospital[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<{ km: number; sec: number } | null>(null);
-  const [center, setCenter] = useState<{ lat: number; lng: number }>(ALGIERS);
+  const [filterType, setFilterType] = useState<(typeof TYPES)[number]>("all");
+  const [loading, setLoading] = useState(true);
 
-  // Load Maps JS API once
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.google?.maps) {
-      setMapsReady(true);
-      return;
-    }
-    const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
-    const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
-    if (!key) return;
-    window.__initShiftflowMap = () => setMapsReady(true);
-    const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=geometry&callback=__initShiftflowMap${
-      channel ? `&channel=${channel}` : ""
-    }`;
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
-  }, []);
-
-  // Init map
-  useEffect(() => {
-    if (!mapsReady || !mapEl.current || mapRef.current) return;
-    const g = window.google;
-    mapRef.current = new g.maps.Map(mapEl.current, {
-      center: ALGIERS,
-      zoom: 6,
-      disableDefaultUI: true,
-      zoomControl: true,
-      gestureHandling: "greedy",
-      restriction: {
-        latLngBounds: { north: 38.5, south: 18.0, west: -10.0, east: 13.0 },
-        strictBounds: false,
-      },
-      styles: [
-        { elementType: "geometry", stylers: [{ color: "#0b1220" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#0b1220" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-        { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#3b82f6" }] },
-        { featureType: "poi", stylers: [{ visibility: "off" }] },
-        { featureType: "poi.medical", stylers: [{ visibility: "off" }] },
-        { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
-        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#334155" }] },
-        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
-        { featureType: "transit", stylers: [{ visibility: "off" }] },
-      ],
-    });
-  }, [mapsReady]);
-
-  // Geolocate
   const locate = () => {
-    if (!navigator.geolocation) {
-      setLocError("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) { setLocError("Geolocation not supported"); return; }
     setLocError(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUserLoc(loc);
-      },
+      (pos) => setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       (err) => setLocError(err.message),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 },
     );
   };
+  useEffect(() => { locate(); }, []);
+
   useEffect(() => {
-    locate();
+    supabase.from("hospitals").select("*").order("wilaya_code").then(({ data }) => {
+      setHospitals((data ?? []) as DBHospital[]); setLoading(false);
+    });
   }, []);
 
-  // Fetch hospitals when location is set
-  useEffect(() => {
-    let cancel = false;
-    async function load() {
-      setLoading(true);
-      try {
-        const r = await fetch("/api/hospitals", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lat: userLoc?.lat,
-            lng: userLoc?.lng,
-            radius: 50000,
-          }),
-        });
-        const data = await r.json();
-        if (cancel) return;
-        if (data.hospitals) {
-          setHospitals(data.hospitals);
-          if (data.center) setCenter(data.center);
-        }
-      } catch {
-        /* ignore */
-      } finally {
-        if (!cancel) setLoading(false);
-      }
-    }
-    load();
-    return () => {
-      cancel = true;
-    };
-  }, [userLoc]);
-
-  // Sorted by distance from user (or center)
-  const origin = userLoc ?? center;
-  const sorted = useMemo(() => {
-    return [...hospitals]
+  const origin = userLoc ?? ALGIERS;
+  const sorted: RowH[] = useMemo(() => {
+    return hospitals
+      .filter((h) => filterType === "all" || h.type === filterType)
       .map((h) => ({ ...h, _km: haversineKm(origin, h) }))
       .sort((a, b) => a._km - b._km);
-  }, [hospitals, origin]);
+  }, [hospitals, origin, filterType]);
 
-  // Auto-select nearest on first load
-  useEffect(() => {
-    if (!selectedId && sorted.length > 0) {
-      setSelectedId(sorted[0].id);
-    }
-  }, [sorted, selectedId]);
-
-  // Render markers + user
-  useEffect(() => {
-    if (!mapsReady || !mapRef.current) return;
-    const g = window.google;
-    const map = mapRef.current;
-
-    // User marker
-    if (userLoc) {
-      if (!userMarkerRef.current) {
-        userMarkerRef.current = new g.maps.Marker({
-          position: userLoc,
-          map,
-          icon: {
-            path: g.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#3b82f6",
-            fillOpacity: 1,
-            strokeColor: "#ffffff",
-            strokeWeight: 2,
-          },
-          zIndex: 999,
-        });
-        userCircleRef.current = new g.maps.Circle({
-          map,
-          center: userLoc,
-          radius: 600,
-          fillColor: "#3b82f6",
-          fillOpacity: 0.12,
-          strokeColor: "#3b82f6",
-          strokeOpacity: 0.4,
-          strokeWeight: 1,
-        });
-      } else {
-        userMarkerRef.current.setPosition(userLoc);
-        userCircleRef.current?.setCenter(userLoc);
-      }
-    }
-
-    // Hospital markers
-    hospitalMarkersRef.current.forEach((m) => m.setMap(null));
-    hospitalMarkersRef.current = sorted.map((h, i) => {
-      const isNearest = i === 0;
-      const marker = new g.maps.Marker({
-        position: { lat: h.lat, lng: h.lng },
-        map,
-        title: h.name,
-        icon: {
-          path: "M12 2C7.6 2 4 5.6 4 10c0 5.2 6.4 11.4 7.3 12.2.4.4 1 .4 1.4 0C13.6 21.4 20 15.2 20 10c0-4.4-3.6-8-8-8zm-1 5h2v2h2v2h-2v2h-2v-2H9V9h2V7z",
-          fillColor: isNearest ? "#ef4444" : selectedId === h.id ? "#f59e0b" : "#10b981",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 1.5,
-          scale: isNearest ? 1.8 : 1.4,
-          anchor: new g.maps.Point(12, 22),
-        },
-        zIndex: isNearest ? 500 : 100,
-      });
-      marker.addListener("click", () => setSelectedId(h.id));
-      return marker;
-    });
-
-    // Fit bounds on first load
-    if (sorted.length > 0 && userLoc) {
-      const bounds = new g.maps.LatLngBounds();
-      bounds.extend(userLoc);
-      sorted.slice(0, 5).forEach((h) => bounds.extend({ lat: h.lat, lng: h.lng }));
-      map.fitBounds(bounds, 80);
-    } else if (sorted.length > 0) {
-      map.setCenter({ lat: sorted[0].lat, lng: sorted[0].lng });
-      map.setZoom(11);
-    }
-  }, [mapsReady, sorted, userLoc, selectedId]);
-
-  // Compute route when selection changes
-  useEffect(() => {
-    if (!mapsReady || !selectedId || !userLoc) return;
-    const target = sorted.find((h) => h.id === selectedId);
-    if (!target) return;
-    let cancel = false;
-    (async () => {
-      try {
-        const r = await fetch("/api/route-to", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: userLoc,
-            to: { lat: target.lat, lng: target.lng },
-          }),
-        });
-        const data = await r.json();
-        if (cancel || !data.polyline) return;
-        const g = window.google;
-        const path = g.maps.geometry.encoding.decodePath(data.polyline);
-        if (routeLineRef.current) routeLineRef.current.setMap(null);
-        routeLineRef.current = new g.maps.Polyline({
-          path,
-          map: mapRef.current,
-          strokeColor: "#3b82f6",
-          strokeOpacity: 0.9,
-          strokeWeight: 5,
-          icons: [
-            {
-              icon: { path: g.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 3, strokeColor: "#fff" },
-              offset: "100%",
-            },
-          ],
-        });
-        setRouteInfo({ km: data.distanceMeters / 1000, sec: data.durationSeconds });
-        const bounds = new g.maps.LatLngBounds();
-        bounds.extend(userLoc);
-        bounds.extend({ lat: target.lat, lng: target.lng });
-        mapRef.current.fitBounds(bounds, 100);
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancel = true;
-    };
-  }, [mapsReady, selectedId, userLoc, sorted]);
+  useEffect(() => { if (!selectedId && sorted.length) setSelectedId(sorted[0].id); }, [sorted, selectedId]);
 
   const selected = sorted.find((h) => h.id === selectedId);
-  const browserKey = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
+  const fitPoints: [number, number][] = useMemo(() => {
+    const pts: [number, number][] = [];
+    if (userLoc) pts.push([userLoc.lat, userLoc.lng]);
+    if (selected) pts.push([selected.lat, selected.lng]);
+    if (pts.length === 0 && sorted[0]) pts.push([sorted[0].lat, sorted[0].lng]);
+    return pts;
+  }, [userLoc, selected, sorted]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 pt-8 pb-32 space-y-4 relative z-10" dir={isRtl ? "rtl" : "ltr"}>
-      <motion.header
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-start justify-between gap-3"
-      >
+      <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span className="pulse-dot" />
-            <span>{isRtl ? "خريطة المستشفيات" : "Hospital map"}</span>
+            <span className="pulse-dot" /><span>{isRtl ? "خريطة المستشفيات" : "Hospital map"}</span>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gradient">
-            {isRtl ? "مستشفيات الجزائر" : "Algeria Hospitals"}
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-gradient">{isRtl ? "مستشفيات الجزائر" : "Algeria Hospitals"}</h1>
           <p className="text-xs text-muted-foreground mt-1">
-            {isRtl
-              ? "أقرب المرافق الصحية مع مسار مباشر من موقعك."
-              : "Closest medical facilities with live driving routes from your location."}
+            {isRtl ? "قاعدة بيانات مستقلة · بدون خرائط جوجل" : "Independent database · No Google Maps"}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={locate} className="glass shrink-0">
-          <LocateFixed className="size-4 me-1.5" />
-          {isRtl ? "موقعي" : "Locate"}
+          <LocateFixed className="size-4 me-1.5" />{isRtl ? "موقعي" : "Locate"}
         </Button>
       </motion.header>
 
-      {!browserKey && (
-        <GlassCard className="border-amber-500/40">
-          <div className="flex gap-2 items-start text-sm">
-            <AlertTriangle className="size-5 text-amber-400 shrink-0" />
-            <span>Google Maps key missing. Please reconnect the Google Maps connector.</span>
-          </div>
-        </GlassCard>
-      )}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+        {TYPES.map((t) => (
+          <button key={t} onClick={() => setFilterType(t)}
+            className={cn("px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 transition",
+              filterType === t ? "bg-primary text-primary-foreground glow" : "glass text-muted-foreground")}>
+            {t === "all" ? (isRtl ? "الكل" : "All") : t.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
       {locError && (
         <GlassCard className="border-rose-500/30">
           <div className="flex gap-2 items-start text-sm">
             <AlertTriangle className="size-5 text-rose-400 shrink-0" />
             <div>
-              <div className="font-medium">
-                {isRtl ? "تعذر تحديد موقعك" : "Could not get your location"}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {isRtl
-                  ? "نعرض المستشفيات حول الجزائر العاصمة."
-                  : "Showing hospitals around Algiers instead."}
-              </div>
+              <div className="font-medium">{isRtl ? "تعذر تحديد موقعك" : "Could not get your location"}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{isRtl ? "المسافات محسوبة من الجزائر العاصمة." : "Distances measured from Algiers."}</div>
             </div>
           </div>
         </GlassCard>
@@ -377,33 +144,43 @@ function MapPage() {
 
       <GlassCard className="overflow-hidden p-0">
         <div className="relative">
-          <div ref={mapEl} className="w-full h-[420px] bg-slate-950" />
-          {(!mapsReady || loading) && (
+          <div className="w-full h-[420px]">
+            <MapContainer center={[origin.lat, origin.lng]} zoom={6} style={{ height: "100%", width: "100%", background: "#0b1220" }} scrollWheelZoom>
+              <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {userLoc && (
+                <CircleMarker center={[userLoc.lat, userLoc.lng]} radius={8} pathOptions={{ color: "#3b82f6", fillColor: "#3b82f6", fillOpacity: 1, weight: 2 }}>
+                  <Popup>{isRtl ? "موقعك" : "Your location"}</Popup>
+                </CircleMarker>
+              )}
+              {sorted.map((h, i) => {
+                const color = i === 0 ? "#ef4444" : h.id === selectedId ? "#f59e0b" : "#10b981";
+                return (
+                  <Marker key={h.id} position={[h.lat, h.lng]} icon={makeIcon(color, i === 0 ? 36 : 28)} eventHandlers={{ click: () => setSelectedId(h.id) }}>
+                    <Popup><div className="font-semibold text-sm">{h.name}</div><div className="text-xs">{h.city} · {h.type.toUpperCase()}</div></Popup>
+                  </Marker>
+                );
+              })}
+              {userLoc && selected && (
+                <Polyline positions={[[userLoc.lat, userLoc.lng], [selected.lat, selected.lng]]} pathOptions={{ color: "#3b82f6", weight: 4, opacity: 0.7, dashArray: "8 8" }} />
+              )}
+              <FitTo points={fitPoints} />
+            </MapContainer>
+          </div>
+          {loading && (
             <div className="absolute inset-0 grid place-items-center bg-slate-950/60 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" />
-                {loading
-                  ? isRtl ? "جاري البحث عن المستشفيات…" : "Finding hospitals…"
-                  : isRtl ? "تحميل الخريطة…" : "Loading map…"}
-              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{isRtl ? "تحميل…" : "Loading…"}</div>
             </div>
           )}
-          {routeInfo && selected && (
+          {selected && userLoc && (
             <div className="absolute top-3 left-3 right-3 glass-strong rounded-2xl px-3 py-2 flex items-center gap-3 shadow-xl">
-              <div className="size-9 rounded-xl bg-primary/20 grid place-items-center">
-                <Navigation className="size-4 text-primary" />
-              </div>
+              <div className="size-9 rounded-xl bg-primary/20 grid place-items-center"><Navigation className="size-4 text-primary" /></div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {isRtl ? "أقرب مسار" : "Live route"}
-                </div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{isRtl ? "المختار" : "Selected"}</div>
                 <div className="text-sm font-semibold truncate">{selected.name}</div>
               </div>
               <div className="text-right shrink-0">
-                <div className="text-sm font-bold text-gradient">{fmtDistance(routeInfo.km)}</div>
-                <div className="text-[10px] text-muted-foreground">
-                  {fmtDuration(routeInfo.sec)}
-                </div>
+                <div className="text-sm font-bold text-gradient">{fmtDistance(selected._km)}</div>
+                <div className="text-[10px] text-muted-foreground">{fmtDrive(selected._km)}</div>
               </div>
             </div>
           )}
@@ -413,97 +190,40 @@ function MapPage() {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2 text-sm">
           <Hospital className="size-4 text-primary" />
-          <span className="font-semibold">
-            {isRtl ? "المستشفيات القريبة" : "Nearby hospitals"}
-          </span>
+          <span className="font-semibold">{isRtl ? "المستشفيات" : "Hospitals"}</span>
           <span className="text-xs text-muted-foreground">({sorted.length})</span>
         </div>
-        {sorted[0] && (
-          <span className="text-[10px] uppercase tracking-widest text-rose-400 font-semibold">
-            {isRtl ? "الأقرب" : "Nearest"} · {fmtDistance(sorted[0]._km)}
-          </span>
-        )}
       </div>
 
       <div className="space-y-2">
         {sorted.map((h, i) => {
           const active = h.id === selectedId;
           return (
-            <motion.button
-              key={h.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
+            <motion.button key={h.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 10) * 0.02 }}
               onClick={() => setSelectedId(h.id)}
-              className={cn(
-                "w-full text-left glass rounded-2xl p-3 flex gap-3 items-start transition",
-                active && "ring-2 ring-primary/60 glow",
-              )}
-            >
-              <div
-                className={cn(
-                  "size-10 rounded-xl grid place-items-center shrink-0",
-                  i === 0
-                    ? "bg-rose-500/20 text-rose-400"
-                    : active
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-emerald-500/15 text-emerald-400",
-                )}
-              >
+              className={cn("w-full text-left glass rounded-2xl p-3 flex gap-3 items-start transition", active && "ring-2 ring-primary/60 glow")}>
+              <div className={cn("size-10 rounded-xl grid place-items-center shrink-0",
+                i === 0 ? "bg-rose-500/20 text-rose-400" : active ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/15 text-emerald-400")}>
                 <Hospital className="size-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <div className="font-semibold truncate">{h.name}</div>
-                  {i === 0 && (
-                    <span className="text-[9px] uppercase tracking-wider bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded">
-                      {isRtl ? "الأقرب" : "Nearest"}
-                    </span>
-                  )}
+                  <span className="text-[9px] uppercase tracking-wider bg-primary/15 text-primary px-1.5 py-0.5 rounded">{h.type}</span>
+                  {i === 0 && <span className="text-[9px] uppercase tracking-wider bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded">{isRtl ? "الأقرب" : "Nearest"}</span>}
                 </div>
                 <div className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                  <MapPin className="size-3" />
-                  {h.address}
+                  <MapPin className="size-3" />{h.city} · {h.wilaya_name} ({String(h.wilaya_code).padStart(2, "0")})
                 </div>
                 <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
                   <span className="text-primary font-semibold">{fmtDistance(h._km)}</span>
-                  {h.rating != null && <span>★ {h.rating.toFixed(1)}</span>}
-                  {h.phone && (
-                    <a
-                      href={`tel:${h.phone}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1 hover:text-primary"
-                    >
-                      <Phone className="size-3" />
-                      {isRtl ? "اتصال" : "Call"}
-                    </a>
-                  )}
-                  {h.mapsUri && (
-                    <a
-                      href={h.mapsUri}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1 hover:text-primary"
-                    >
-                      <ExternalLink className="size-3" />
-                      Maps
-                    </a>
-                  )}
+                  {h.phone && <a href={`tel:${h.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 hover:text-primary"><Phone className="size-3" />{isRtl ? "اتصال" : "Call"}</a>}
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lng}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 hover:text-primary"><ExternalLink className="size-3" />{isRtl ? "اتجاهات" : "Directions"}</a>
                 </div>
               </div>
             </motion.button>
           );
         })}
-        {!loading && sorted.length === 0 && (
-          <GlassCard>
-            <div className="text-sm text-muted-foreground text-center py-4">
-              {isRtl
-                ? "لم يتم العثور على مستشفيات في هذه المنطقة."
-                : "No hospitals found in this area."}
-            </div>
-          </GlassCard>
-        )}
       </div>
     </div>
   );

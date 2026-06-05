@@ -12,18 +12,22 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SelectRoleRouteImport } from './routes/select-role'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PharmacistRouteImport } from './routes/pharmacist'
+import { Route as NurseRouteImport } from './routes/nurse'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MapRouteImport } from './routes/map'
+import { Route as ManagementRouteImport } from './routes/management'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
 import { Route as FermliRouteImport } from './routes/fermli'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
+import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiRouteToRouteImport } from './routes/api/route-to'
-import { Route as ApiHospitalsRouteImport } from './routes/api/hospitals'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
 import { Route as ApiFermliRouteImport } from './routes/api/fermli'
 
@@ -42,9 +46,24 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SelectRoleRoute = SelectRoleRouteImport.update({
+  id: '/select-role',
+  path: '/select-role',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PharmacistRoute = PharmacistRouteImport.update({
+  id: '/pharmacist',
+  path: '/pharmacist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NurseRoute = NurseRouteImport.update({
+  id: '/nurse',
+  path: '/nurse',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceRoute = MarketplaceRouteImport.update({
@@ -55,6 +74,11 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const MapRoute = MapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagementRoute = ManagementRouteImport.update({
+  id: '/management',
+  path: '/management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -82,24 +106,24 @@ const EvacuationRoute = EvacuationRouteImport.update({
   path: '/evacuation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorRoute = DoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRouteToRoute = ApiRouteToRouteImport.update({
-  id: '/api/route-to',
-  path: '/api/route-to',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHospitalsRoute = ApiHospitalsRouteImport.update({
-  id: '/api/hospitals',
-  path: '/api/hospitals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHakimRoute = ApiHakimRouteImport.update({
@@ -115,140 +139,168 @@ const ApiFermliRoute = ApiFermliRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
+  '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
-  '/api/hospitals': typeof ApiHospitalsRoute
-  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
+  '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
-  '/api/hospitals': typeof ApiHospitalsRoute
-  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
+  '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
-  '/api/hospitals': typeof ApiHospitalsRoute
-  '/api/route-to': typeof ApiRouteToRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
+    | '/select-role'
     | '/settings'
     | '/statistics'
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
-    | '/api/hospitals'
-    | '/api/route-to'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
+    | '/select-role'
     | '/settings'
     | '/statistics'
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
-    | '/api/hospitals'
-    | '/api/route-to'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
+    | '/select-role'
     | '/settings'
     | '/statistics'
     | '/terms'
     | '/api/fermli'
     | '/api/hakim'
-    | '/api/hospitals'
-    | '/api/route-to'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CalendarRoute: typeof CalendarRoute
+  DoctorRoute: typeof DoctorRoute
   EvacuationRoute: typeof EvacuationRoute
   FermliRoute: typeof FermliRoute
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  ManagementRoute: typeof ManagementRoute
   MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRoute
+  NurseRoute: typeof NurseRoute
+  PharmacistRoute: typeof PharmacistRoute
   PrivacyRoute: typeof PrivacyRoute
+  SelectRoleRoute: typeof SelectRoleRoute
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   TermsRoute: typeof TermsRoute
   ApiFermliRoute: typeof ApiFermliRoute
   ApiHakimRoute: typeof ApiHakimRoute
-  ApiHospitalsRoute: typeof ApiHospitalsRoute
-  ApiRouteToRoute: typeof ApiRouteToRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -274,11 +326,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/select-role': {
+      id: '/select-role'
+      path: '/select-role'
+      fullPath: '/select-role'
+      preLoaderRoute: typeof SelectRoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pharmacist': {
+      id: '/pharmacist'
+      path: '/pharmacist'
+      fullPath: '/pharmacist'
+      preLoaderRoute: typeof PharmacistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nurse': {
+      id: '/nurse'
+      path: '/nurse'
+      fullPath: '/nurse'
+      preLoaderRoute: typeof NurseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace': {
@@ -293,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/map'
       fullPath: '/map'
       preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/management': {
+      id: '/management'
+      path: '/management'
+      fullPath: '/management'
+      preLoaderRoute: typeof ManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -330,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EvacuationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -337,25 +424,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/route-to': {
-      id: '/api/route-to'
-      path: '/api/route-to'
-      fullPath: '/api/route-to'
-      preLoaderRoute: typeof ApiRouteToRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hospitals': {
-      id: '/api/hospitals'
-      path: '/api/hospitals'
-      fullPath: '/api/hospitals'
-      preLoaderRoute: typeof ApiHospitalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hakim': {
@@ -377,33 +457,27 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CalendarRoute: CalendarRoute,
+  DoctorRoute: DoctorRoute,
   EvacuationRoute: EvacuationRoute,
   FermliRoute: FermliRoute,
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  ManagementRoute: ManagementRoute,
   MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRoute,
+  NurseRoute: NurseRoute,
+  PharmacistRoute: PharmacistRoute,
   PrivacyRoute: PrivacyRoute,
+  SelectRoleRoute: SelectRoleRoute,
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   TermsRoute: TermsRoute,
   ApiFermliRoute: ApiFermliRoute,
   ApiHakimRoute: ApiHakimRoute,
-  ApiHospitalsRoute: ApiHospitalsRoute,
-  ApiRouteToRoute: ApiRouteToRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

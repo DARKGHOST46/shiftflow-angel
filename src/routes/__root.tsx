@@ -8,7 +8,9 @@ import {
 import appCss from "../styles.css?url";
 import { AppProvider } from "@/lib/app-context";
 import { AuthProvider } from "@/lib/auth-context";
+import { ProfileProvider } from "@/lib/profile-context";
 import { Toaster } from "@/components/ui/sonner";
+import "leaflet/dist/leaflet.css";
 import { GlobalErrorBoundary } from "@/components/error-boundary";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -61,10 +63,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppProvider>
-          <Outlet />
-          <Toaster position="top-center" />
-        </AppProvider>
+        <ProfileProvider>
+          <AppProvider>
+            <Outlet />
+            <Toaster position="top-center" />
+          </AppProvider>
+        </ProfileProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
