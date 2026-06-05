@@ -36,13 +36,13 @@ function ManagementDashboard() {
   async function load() {
     setLoading(true);
     if (!profile?.hospital_id) { setLoading(false); return; }
-    const [{ data: ps }, { data: rs }, { data: as }, { data: pats }, { data: cons }, { data: rx }, { data: stk }] = await Promise.all([
+    const [{ data: ps }, { data: rs }, { data: as }, { count: pCount }, { count: cCount }, { count: rxCount }, { data: stk }] = await Promise.all([
       supabase.from("profiles").select("id,display_name,email,phone").eq("hospital_id", profile.hospital_id),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(50),
-      supabase.from("patients").select("id", { count: "exact", head: true }),
-      supabase.from("consultations").select("id", { count: "exact", head: true }),
-      supabase.from("prescriptions").select("id", { count: "exact", head: true }),
+      supabase.from("patients").select("*", { count: "exact", head: true }),
+      supabase.from("consultations").select("*", { count: "exact", head: true }),
+      supabase.from("prescriptions").select("*", { count: "exact", head: true }),
       supabase.from("pharmacy_stock").select("qty,min_threshold"),
     ]);
     const rolesByUser = new Map<string, string[]>();
@@ -52,9 +52,9 @@ function ManagementDashboard() {
     setStaff(((ps ?? []) as Omit<Staff, "roles">[]).map((p) => ({ ...p, roles: rolesByUser.get(p.id) ?? [] })));
     setAnn((as ?? []) as Ann[]);
     setKpis({
-      patients: (pats as unknown as { length: number })?.length ?? 0,
-      consultations: (cons as unknown as { length: number })?.length ?? 0,
-      prescriptions: (rx as unknown as { length: number })?.length ?? 0,
+      patients: pCount ?? 0,
+      consultations: cCount ?? 0,
+      prescriptions: rxCount ?? 0,
       low: ((stk ?? []) as { qty: number; min_threshold: number }[]).filter((s) => s.qty <= s.min_threshold).length,
     });
     setLoading(false);
