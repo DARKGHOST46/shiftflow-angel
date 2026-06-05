@@ -14,14 +14,19 @@ import { Route as StatisticsRouteImport } from './routes/statistics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SelectRoleRouteImport } from './routes/select-role'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PharmacistRouteImport } from './routes/pharmacist'
+import { Route as NurseRouteImport } from './routes/nurse'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MapRouteImport } from './routes/map'
+import { Route as ManagementRouteImport } from './routes/management'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LabTubesRouteImport } from './routes/lab-tubes'
 import { Route as HakimRouteImport } from './routes/hakim'
 import { Route as FermliRouteImport } from './routes/fermli'
 import { Route as EvacuationRouteImport } from './routes/evacuation'
+import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
 import { Route as ApiFermliRouteImport } from './routes/api/fermli'
@@ -51,6 +56,16 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PharmacistRoute = PharmacistRouteImport.update({
+  id: '/pharmacist',
+  path: '/pharmacist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NurseRoute = NurseRouteImport.update({
+  id: '/nurse',
+  path: '/nurse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -59,6 +74,11 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const MapRoute = MapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagementRoute = ManagementRouteImport.update({
+  id: '/management',
+  path: '/management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -86,9 +106,19 @@ const EvacuationRoute = EvacuationRouteImport.update({
   path: '/evacuation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorRoute = DoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -109,14 +139,19 @@ const ApiFermliRoute = ApiFermliRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
   '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
@@ -127,14 +162,19 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
   '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
@@ -146,14 +186,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
+  '/doctor': typeof DoctorRoute
   '/evacuation': typeof EvacuationRoute
   '/fermli': typeof FermliRoute
   '/hakim': typeof HakimRoute
   '/lab-tubes': typeof LabTubesRoute
   '/login': typeof LoginRoute
+  '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nurse': typeof NurseRoute
+  '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
   '/select-role': typeof SelectRoleRoute
   '/settings': typeof SettingsRoute
@@ -166,14 +211,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
     | '/select-role'
     | '/settings'
@@ -184,14 +234,19 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
     | '/select-role'
     | '/settings'
@@ -202,14 +257,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/calendar'
+    | '/doctor'
     | '/evacuation'
     | '/fermli'
     | '/hakim'
     | '/lab-tubes'
     | '/login'
+    | '/management'
     | '/map'
     | '/marketplace'
+    | '/nurse'
+    | '/pharmacist'
     | '/privacy'
     | '/select-role'
     | '/settings'
@@ -221,14 +281,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CalendarRoute: typeof CalendarRoute
+  DoctorRoute: typeof DoctorRoute
   EvacuationRoute: typeof EvacuationRoute
   FermliRoute: typeof FermliRoute
   HakimRoute: typeof HakimRoute
   LabTubesRoute: typeof LabTubesRoute
   LoginRoute: typeof LoginRoute
+  ManagementRoute: typeof ManagementRoute
   MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRoute
+  NurseRoute: typeof NurseRoute
+  PharmacistRoute: typeof PharmacistRoute
   PrivacyRoute: typeof PrivacyRoute
   SelectRoleRoute: typeof SelectRoleRoute
   SettingsRoute: typeof SettingsRoute
@@ -275,6 +340,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pharmacist': {
+      id: '/pharmacist'
+      path: '/pharmacist'
+      fullPath: '/pharmacist'
+      preLoaderRoute: typeof PharmacistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nurse': {
+      id: '/nurse'
+      path: '/nurse'
+      fullPath: '/nurse'
+      preLoaderRoute: typeof NurseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace': {
       id: '/marketplace'
       path: '/marketplace'
@@ -287,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/map'
       fullPath: '/map'
       preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/management': {
+      id: '/management'
+      path: '/management'
+      fullPath: '/management'
+      preLoaderRoute: typeof ManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -324,11 +410,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EvacuationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -357,14 +457,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CalendarRoute: CalendarRoute,
+  DoctorRoute: DoctorRoute,
   EvacuationRoute: EvacuationRoute,
   FermliRoute: FermliRoute,
   HakimRoute: HakimRoute,
   LabTubesRoute: LabTubesRoute,
   LoginRoute: LoginRoute,
+  ManagementRoute: ManagementRoute,
   MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRoute,
+  NurseRoute: NurseRoute,
+  PharmacistRoute: PharmacistRoute,
   PrivacyRoute: PrivacyRoute,
   SelectRoleRoute: SelectRoleRoute,
   SettingsRoute: SettingsRoute,
@@ -376,3 +481,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
