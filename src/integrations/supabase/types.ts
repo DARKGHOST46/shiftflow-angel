@@ -14,6 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          hospital_id: string | null
+          id: string
+          target_roles: string[]
+          title: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          hospital_id?: string | null
+          id?: string
+          target_roles?: string[]
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          hospital_id?: string | null
+          id?: string
+          target_roles?: string[]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultations: {
+        Row: {
+          complaint: string | null
+          created_at: string
+          diagnosis: string | null
+          doctor_id: string
+          hospital_id: string
+          id: string
+          patient_id: string
+          plan: string | null
+          visit_date: string
+        }
+        Insert: {
+          complaint?: string | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id: string
+          hospital_id: string
+          id?: string
+          patient_id: string
+          plan?: string | null
+          visit_date?: string
+        }
+        Update: {
+          complaint?: string | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id?: string
+          hospital_id?: string
+          id?: string
+          patient_id?: string
+          plan?: string | null
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispensing_log: {
+        Row: {
+          dispensed_at: string
+          dispensed_by: string
+          hospital_id: string
+          id: string
+          items: Json
+          notes: string | null
+          patient_id: string | null
+          prescription_id: string | null
+        }
+        Insert: {
+          dispensed_at?: string
+          dispensed_by: string
+          hospital_id: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          patient_id?: string | null
+          prescription_id?: string | null
+        }
+        Update: {
+          dispensed_at?: string
+          dispensed_by?: string
+          hospital_id?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          patient_id?: string | null
+          prescription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispensing_log_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispensing_log_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispensing_log_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evacuation_entries: {
         Row: {
           created_at: string
@@ -85,6 +229,105 @@ export type Database = {
         }
         Relationships: []
       }
+      hospitals: {
+        Row: {
+          address: string | null
+          city: string
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+          name_ar: string | null
+          name_fr: string | null
+          phone: string | null
+          type: string
+          updated_at: string
+          wilaya_code: number
+          wilaya_name: string
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          created_at?: string
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          name_ar?: string | null
+          name_fr?: string | null
+          phone?: string | null
+          type?: string
+          updated_at?: string
+          wilaya_code: number
+          wilaya_name: string
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          name_ar?: string | null
+          name_fr?: string | null
+          phone?: string | null
+          type?: string
+          updated_at?: string
+          wilaya_code?: number
+          wilaya_name?: string
+        }
+        Relationships: []
+      }
+      lab_orders: {
+        Row: {
+          hospital_id: string
+          id: string
+          notes: string | null
+          ordered_at: string
+          ordered_by: string
+          patient_id: string
+          status: string
+          tests: Json
+        }
+        Insert: {
+          hospital_id: string
+          id?: string
+          notes?: string | null
+          ordered_at?: string
+          ordered_by: string
+          patient_id: string
+          status?: string
+          tests?: Json
+        }
+        Update: {
+          hospital_id?: string
+          id?: string
+          notes?: string | null
+          ordered_at?: string
+          ordered_by?: string
+          patient_id?: string
+          status?: string
+          tests?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_orders_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lab_orders_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_listings: {
         Row: {
           category: string
@@ -124,30 +367,231 @@ export type Database = {
         }
         Relationships: []
       }
+      patients: {
+        Row: {
+          allergies: string | null
+          created_at: string
+          created_by: string
+          dob: string | null
+          full_name: string
+          hospital_id: string
+          id: string
+          mrn: string | null
+          notes: string | null
+          phone: string | null
+          sex: string | null
+          updated_at: string
+        }
+        Insert: {
+          allergies?: string | null
+          created_at?: string
+          created_by: string
+          dob?: string | null
+          full_name: string
+          hospital_id: string
+          id?: string
+          mrn?: string | null
+          notes?: string | null
+          phone?: string | null
+          sex?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allergies?: string | null
+          created_at?: string
+          created_by?: string
+          dob?: string | null
+          full_name?: string
+          hospital_id?: string
+          id?: string
+          mrn?: string | null
+          notes?: string | null
+          phone?: string | null
+          sex?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacy_stock: {
+        Row: {
+          batch: string | null
+          brand: string | null
+          created_at: string
+          dci: string
+          expiry: string | null
+          form: string | null
+          hospital_id: string
+          id: string
+          min_threshold: number
+          qty: number
+          strength: string | null
+          supplier: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch?: string | null
+          brand?: string | null
+          created_at?: string
+          dci: string
+          expiry?: string | null
+          form?: string | null
+          hospital_id: string
+          id?: string
+          min_threshold?: number
+          qty?: number
+          strength?: string | null
+          supplier?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch?: string | null
+          brand?: string | null
+          created_at?: string
+          dci?: string
+          expiry?: string | null
+          form?: string | null
+          hospital_id?: string
+          id?: string
+          min_threshold?: number
+          qty?: number
+          strength?: string | null
+          supplier?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_stock_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          hospital_id: string
+          id: string
+          issued_date: string
+          items: Json
+          notes: string | null
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          hospital_id: string
+          id?: string
+          issued_date?: string
+          items?: Json
+          notes?: string | null
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          hospital_id?: string
+          id?: string
+          issued_date?: string
+          items?: Json
+          notes?: string | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string | null
           email: string | null
+          hospital_id: string | null
           id: string
+          phone: string | null
+          role_selected: boolean
           updated_at: string
+          wilaya_code: number | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          hospital_id?: string | null
           id: string
+          phone?: string | null
+          role_selected?: boolean
           updated_at?: string
+          wilaya_code?: number | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          hospital_id?: string | null
           id?: string
+          phone?: string | null
+          role_selected?: boolean
           updated_at?: string
+          wilaya_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_hospital_fk"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -156,10 +600,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_hospital_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_admin_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "doctor" | "nurse" | "pharmacist" | "management" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -286,6 +739,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["doctor", "nurse", "pharmacist", "management", "admin"],
+    },
   },
 } as const
