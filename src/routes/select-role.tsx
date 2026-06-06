@@ -101,11 +101,11 @@ function SelectRolePage() {
           {hospitals.map((h) => <option key={h.id} value={h.id} className="bg-slate-900">{h.name} — {h.city}</option>)}
         </select>
         {wilaya && hospitals.length === 0 && (
-          <p className="text-[11px] text-muted-foreground mt-2">Ask the admin to add your facility, or pick a nearby wilaya.</p>
+          <p className="text-[11px] text-muted-foreground mt-2">No hospitals in this wilaya yet — you can continue without one and set it later.</p>
         )}
       </GlassCard>
 
-      <Button onClick={submit} disabled={!role || !wilaya || !hospitalId || saving} className="w-full h-12">
+      <Button onClick={submit} disabled={!canSubmit || saving} className="w-full h-12">
         {saving ? <Loader2 className="animate-spin size-4 me-2" /> : null}
         Continue
       </Button>
