@@ -39,8 +39,11 @@ function SelectRolePage() {
 
   const choices = useMemo(() => ALL_ROLES.filter((r) => r !== "admin"), []);
 
+  const noHospitalsForWilaya = wilaya != null && hospitals.length === 0;
+  const canSubmit = !!role && !!wilaya && (!!hospitalId || noHospitalsForWilaya);
+
   async function submit() {
-    if (!user || !role || !wilaya || !hospitalId) return;
+    if (!user || !role || !wilaya) return;
     setSaving(true);
     const { error: pe } = await supabase.from("profiles").update({
       wilaya_code: wilaya, hospital_id: hospitalId, role_selected: true,
