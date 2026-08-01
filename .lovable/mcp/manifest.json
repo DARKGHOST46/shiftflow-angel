@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://juhsmonjemgwqkquwmwd.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "shiftflow-mcp",
+      "version": "0.1.0",
+      "title": "ShiftFlow Nurse"
+    },
+    "tools": [
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Return the signed-in ShiftFlow user's profile (display name, email, hospital, wilaya) and their assigned roles.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_evacuation_lists",
+        "title": "List evacuation lists",
+        "description": "List the signed-in user's evacuation rosters (name, destination such as Oran or Aïn Témouchent) with the number of nurses queued in each.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_evacuation_entries",
+        "title": "List evacuation queue",
+        "description": "List the nurses queued in one of the signed-in user's evacuation lists, in turn order.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "list_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The evacuation list ID from list_evacuation_lists."
+            }
+          },
+          "required": [
+            "list_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_evacuation_entry",
+        "title": "Add nurse to evacuation queue",
+        "description": "Append a nurse to the end of one of the signed-in user's evacuation lists.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "list_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The evacuation list ID from list_evacuation_lists."
+            },
+            "nurse_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Name of the nurse to add."
+            },
+            "place": {
+              "description": "Optional place or note for this turn.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "list_id",
+            "nurse_name"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_hospitals",
+        "title": "Search Algerian hospitals",
+        "description": "Search the Algerian hospital directory by name, city, wilaya code, or facility type.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Free-text match on hospital name or city.",
+              "type": "string"
+            },
+            "wilaya_code": {
+              "description": "Algerian wilaya code, e.g. 31 for Oran.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "type": {
+              "description": "Facility type filter, e.g. CHU, EPH, clinic.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max rows to return (default 20).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_marketplace_listings",
+        "title": "List marketplace listings",
+        "description": "List ShiftFlow marketplace listings (medical equipment and nursing supplies) with title, price in DZD, category and condition.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "category": {
+              "description": "Filter by listing category.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max rows to return (default 20).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_announcements",
+        "title": "List hospital announcements",
+        "description": "List announcements visible to the signed-in user, newest first, scoped to their hospital and role by access policy.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max rows to return (default 20).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

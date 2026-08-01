@@ -16,6 +16,7 @@ import { Route as SelectRoleRouteImport } from './routes/select-role'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PharmacistRouteImport } from './routes/pharmacist'
 import { Route as NurseRouteImport } from './routes/nurse'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as ManagementRouteImport } from './routes/management'
@@ -30,6 +31,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHakimRouteImport } from './routes/api/hakim'
 import { Route as ApiFermliRouteImport } from './routes/api/fermli'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -64,6 +69,11 @@ const PharmacistRoute = PharmacistRouteImport.update({
 const NurseRoute = NurseRouteImport.update({
   id: '/nurse',
   path: '/nurse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceRoute = MarketplaceRouteImport.update({
@@ -136,6 +146,29 @@ const ApiFermliRoute = ApiFermliRouteImport.update({
   path: '/api/fermli',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -150,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/mcp': typeof McpRoute
   '/nurse': typeof NurseRoute
   '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
@@ -157,8 +191,12 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -173,6 +211,7 @@ export interface FileRoutesByTo {
   '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/mcp': typeof McpRoute
   '/nurse': typeof NurseRoute
   '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
@@ -180,8 +219,12 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +240,7 @@ export interface FileRoutesById {
   '/management': typeof ManagementRoute
   '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRoute
+  '/mcp': typeof McpRoute
   '/nurse': typeof NurseRoute
   '/pharmacist': typeof PharmacistRoute
   '/privacy': typeof PrivacyRoute
@@ -204,8 +248,12 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/statistics': typeof StatisticsRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/fermli': typeof ApiFermliRoute
   '/api/hakim': typeof ApiHakimRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -222,6 +270,7 @@ export interface FileRouteTypes {
     | '/management'
     | '/map'
     | '/marketplace'
+    | '/mcp'
     | '/nurse'
     | '/pharmacist'
     | '/privacy'
@@ -229,8 +278,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/fermli'
     | '/api/hakim'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -245,6 +298,7 @@ export interface FileRouteTypes {
     | '/management'
     | '/map'
     | '/marketplace'
+    | '/mcp'
     | '/nurse'
     | '/pharmacist'
     | '/privacy'
@@ -252,8 +306,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/fermli'
     | '/api/hakim'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
@@ -268,6 +326,7 @@ export interface FileRouteTypes {
     | '/management'
     | '/map'
     | '/marketplace'
+    | '/mcp'
     | '/nurse'
     | '/pharmacist'
     | '/privacy'
@@ -275,8 +334,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/fermli'
     | '/api/hakim'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -292,6 +355,7 @@ export interface RootRouteChildren {
   ManagementRoute: typeof ManagementRoute
   MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRoute
+  McpRoute: typeof McpRoute
   NurseRoute: typeof NurseRoute
   PharmacistRoute: typeof PharmacistRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -299,8 +363,12 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatisticsRoute: typeof StatisticsRoute
   TermsRoute: typeof TermsRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiFermliRoute: typeof ApiFermliRoute
   ApiHakimRoute: typeof ApiHakimRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -352,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/nurse'
       fullPath: '/nurse'
       preLoaderRoute: typeof NurseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace': {
@@ -452,6 +527,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFermliRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -468,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManagementRoute: ManagementRoute,
   MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRoute,
+  McpRoute: McpRoute,
   NurseRoute: NurseRoute,
   PharmacistRoute: PharmacistRoute,
   PrivacyRoute: PrivacyRoute,
@@ -475,8 +579,13 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatisticsRoute: StatisticsRoute,
   TermsRoute: TermsRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiFermliRoute: ApiFermliRoute,
   ApiHakimRoute: ApiHakimRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
