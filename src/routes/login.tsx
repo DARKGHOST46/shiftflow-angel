@@ -8,26 +8,36 @@ import { useApp } from "@/lib/app-context";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+      ? s.next
+      : undefined,
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const { session, loading } = useAuth();
+  const { next } = Route.useSearch();
   const { t } = useApp();
   const navigate = useNavigate();
   const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     if (!loading && session) {
+      if (next) {
+        window.location.replace(next);
+        return;
+      }
       navigate({ to: "/", replace: true });
     }
-  }, [loading, session, navigate]);
+  }, [loading, session, navigate, next]);
 
   const handleGoogle = async () => {
     try {
       setSigningIn(true);
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: next ? `${window.location.origin}${next}` : window.location.origin,
       });
       if (result.error) {
         toast.error(t("loginError"));
